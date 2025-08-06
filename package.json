@@ -1,0 +1,38 @@
+{
+	"scripts": {
+		"nuxt:dev": "nuxt dev",
+		"nuxt:build": "nuxt build",
+		"nuxt:preview": "nuxt preview",
+		"nuxt:prepare": "nuxt prepare",
+		"nuxt:generate": "nuxt generate",
+		"eslint:lint": "eslint . --fix",
+		"prettier:format": "prettier --write \"**/*.*\""
+	},
+	"dependencies": {
+		"@nuxt/content": "latest",
+		"@nuxt/devtools": "latest",
+		"@nuxt/eslint": "latest",
+		"@nuxt/fonts": "latest",
+		"@nuxt/icon": "latest",
+		"@nuxt/image": "latest",
+		"@nuxt/scripts": "latest",
+		"@nuxt/test-utils": "latest",
+		"@nuxt/ui": "latest",
+		"nuxt": "latest",
+		"pg": "latest",
+		"vite": "latest",
+		"vitest": "latest",
+		"vue": "latest",
+		"vue-router": "latest",
+		"vue-tsc": "latest"
+	},
+	"devDependencies": {
+		"eslint": "latest",
+		"eslint-config-prettier": "latest",
+		"eslint-plugin-prettier": "latest",
+		"prettier": "latest",
+		"prettier-plugin-tailwindcss": "latest",
+		"tailwindcss": "latest",
+		"typescript": "latest"
+	}
+}
