@@ -1,6 +1,4 @@
 <script setup lang="ts">
-	import { queryContent } from "#content";
-
 	const route = useRoute();
 	const { t, locale } = useI18n();
 	const localePath = useLocalePath();
@@ -9,13 +7,19 @@
 	// Resolve o caminho do documento conforme o locale atual
 	const path = computed(() => {
 		const slug = (route.params.slug as string[]).join("/");
-		// Agora todos os conteúdos ficam em /<locale>/posts
-		return `/${locale.value}/posts/${slug}`;
+		// Agora todos os conteúdos ficam em /<locale>/posts (locale salvo em minúsculas no BD)
+		return `/${locale.value.toLowerCase()}/posts/${slug}`;
 	});
 
 	const { data: doc } = await useAsyncData(
 		`post:${path.value}`,
-		() => queryContent(path.value).findOne(),
+		async () => {
+			// Busca o item da coleção "posts" pelo path resolvido
+			const item = await queryCollection("posts")
+				.where("path", "=", path.value)
+				.first();
+			return item as any;
+		},
 		{ watch: [path] },
 	);
 
@@ -23,7 +27,7 @@
 		if (!doc.value) {
 			throw createError({
 				statusCode: 404,
-				statusMessage: t("errors.postNotFound") as string,
+				message: t("errors.postNotFound") as string,
 			});
 		}
 
@@ -55,8 +59,8 @@
 							"@type": "WebPage",
 							"@id": new URL(
 								localePath(
-									((doc.value as any)._path as string).replace(
-										`/${locale.value}/posts`,
+									((doc.value as any).path as string).replace(
+										/^\/[^/]+\/posts/,
 										"/blog",
 									),
 								),
@@ -88,6 +92,7 @@
 		<p class="mt-0 text-sm text-gray-500">
 			{{ formatDate((doc as any).date) }}
 		</p>
-		<ContentRenderer :value="doc" />
+		<!-- O body já vem renderizável via ContentRenderer se presente -->
+		<ContentRenderer :value="doc as any" />
 	</article>
 </template>

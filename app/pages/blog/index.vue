@@ -1,6 +1,4 @@
 <script setup lang="ts">
-	import { queryContent } from "#content";
-
 	const { t, locale } = useI18n();
 	const localePath = useLocalePath();
 	const title = computed(() => t("site.blog"));
@@ -16,10 +14,11 @@
 		`posts:list:${locale.value}`,
 		async () => {
 			try {
-				// Consulta todos os posts do locale atual e ordena por data (desc)
-				const all = await queryContent(`/${locale.value}/posts`)
-					.sort({ date: -1 })
-					.find();
+				// Consulta todos os posts do locale atual usando queryCollection e ordena por data (desc)
+				const all = await queryCollection("posts")
+					.where("path", "LIKE", `/${locale.value}/posts/%`)
+					.order("date", "DESC")
+					.all();
 				// Oculta posts marcados como rascunho
 				return all.filter((p: any) => !p.draft);
 			} catch (error) {
@@ -53,12 +52,12 @@
 		<ul class="space-y-4">
 			<li
 				v-for="post in posts"
-				:key="post._path"
+				:key="post.path"
 				class="border-b pb-4">
 				<NuxtLink
-					:to="localePath(toBlogPath(post._path))"
+					:to="localePath(toBlogPath(post.path))"
 					class="text-xl font-medium hover:underline">
-					{{ post.title || post._path.split("/").pop() }}
+					{{ post.title || post.path.split("/").pop() }}
 				</NuxtLink>
 				<div class="text-sm text-gray-500">
 					{{ post.date ? formatDate(post.date) : "" }}

@@ -1,22 +1,26 @@
-import { defineCollection, defineContentConfig, z } from "@nuxt/content";
+import {
+	defineCollection,
+	defineContentConfig,
+	z as type,
+} from "@nuxt/content";
 
 export default defineContentConfig({
 	collections: {
 		posts: defineCollection({
 			type: "page",
 			source: "**/*.md",
-			schema: z.object({
-				title: z.string().describe("Título do post"),
-				description: z.string().optional().describe("Descrição do post"),
-				excerpt: z.string().optional().describe("Resumo do post"),
-				date: z.coerce.date().optional().describe("Data de publicação"),
-				draft: z.boolean().default(false).optional().describe("Rascunho"),
-				tags: z
-					.array(z.string())
+			schema: type.object({
+				title: type.string().describe("Título do post"),
+				description: type.string().optional().describe("Descrição do post"),
+				excerpt: type.string().optional().describe("Resumo do post"),
+				date: type.coerce.date().optional().describe("Data de publicação"),
+				draft: type.boolean().default(false).optional().describe("Rascunho"),
+				tags: type
+					.array(type.string())
 					.default([])
 					.optional()
 					.describe("Tags do post"),
-				cover: z.string().optional().describe("Imagem de capa"),
+				cover: type.string().optional().describe("Imagem de capa"),
 			}),
 		}),
 	},

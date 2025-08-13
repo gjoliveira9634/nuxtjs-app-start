@@ -8,7 +8,7 @@ tags: [nuxt, content]
 
 ## Organização
 
-- Coloque seus posts em `content/pt-BR/posts/`
+- Coloque seus posts em `content/posts/`
 - Use o frontmatter para título, data, tags
 
 ## Renderização

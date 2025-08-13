@@ -12,5 +12,4 @@ componentes de Vue embebidos.
 - Nuxt Content se encarga de la indexación
 - El enrutamiento dinámico lo leerá en `/blog/<slug>`
 
-<Alert type="info" title="Consejo">Agrega más archivos en
-`content/posts/`.</Alert>
+Agrega más archivos en `content/es-MX/posts/`.

@@ -12,5 +12,4 @@ componentes Vue embutidos.
 - Nuxt Content cuida da indexação
 - Roteamento dinâmico fará a leitura em `/blog/<slug>`
 
-<Alert type="info" title="Dica">Adicione mais arquivos em
-`content/pt-BR/posts/`.</Alert>
+Adicione mais arquivos em `content/pt-BR/posts/`.

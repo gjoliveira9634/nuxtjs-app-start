@@ -12,4 +12,4 @@ Vue components.
 - Nuxt Content handles indexing
 - Dynamic routing will read it at `/blog/<slug>`
 
-<Alert type="info" title="Tip">Add more files in `content/posts/`.</Alert>
+Add more files in `content/en-US/posts/`.
