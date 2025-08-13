@@ -29,6 +29,9 @@
 		"vue-tsc": "latest"
 	},
 	"devDependencies": {
+		"@tailwindcss/aspect-ratio": "latest",
+		"@tailwindcss/container-queries": "latest",
+		"@tailwindcss/forms": "latest",
 		"@tailwindcss/typography": "latest",
 		"eslint": "latest",
 		"eslint-config-prettier": "latest",

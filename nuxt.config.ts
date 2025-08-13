@@ -26,10 +26,10 @@ export default defineNuxtConfig({
 	i18n: {
 		locales: [
 			{
-				code: "pt-BR",
-				name: "Português (Brasil)",
-				language: "pt-BR",
-				file: "pt-BR.json",
+				code: "en-US",
+				name: "English (United States)",
+				language: "en-US",
+				file: "en-US.json",
 			},
 			{
 				code: "es-MX",
@@ -38,21 +38,25 @@ export default defineNuxtConfig({
 				file: "es-MX.json",
 			},
 			{
-				code: "en-US",
-				name: "English (United States)",
-				language: "en-US",
-				file: "en-US.json",
+				code: "pt-BR",
+				name: "Português (Brasil)",
+				language: "pt-BR",
+				file: "pt-BR.json",
+			},
+			{
+				code: "fr-CA",
+				name: "Français (Canada)",
+				language: "fr-CA",
+				file: "fr-CA.json",
 			},
 		],
-		defaultLocale: "pt-BR",
-		strategy: "prefix",
+		defaultLocale: "en-US",
+		strategy: "prefix_and_default",
 		baseUrl: process.env.SITE_URL || "http://localhost:3000",
-		langDir: "../app/assets/i18n/locales",
+		langDir: "../app/assets/i18n",
 		detectBrowserLanguage: {
 			useCookie: true,
-			cookieKey: "i18n_redirected",
-			alwaysRedirect: false,
-			redirectOn: "root",
+			cookieKey: "i18n",
 		},
 	},
 	content: {
