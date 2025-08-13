@@ -17,8 +17,8 @@
 
 # Source code
 *.bash            text eol=lf
-*.bat             text eol=lf eol=crlf
-*.cmd             text eol=lf eol=crlf
+*.bat             text eol=lf
+*.cmd             text eol=lf
 *.coffee          text eol=lf
 *.css             text eol=lf diff=css
 *.htm             text eol=lf diff=html
@@ -37,14 +37,14 @@
 *.onlydata        text eol=lf
 *.php             text eol=lf diff=php
 *.pl              text eol=lf
-*.ps1             text eol=lf eol=crlf
+*.ps1             text eol=lf
 *.py              text eol=lf diff=python
 *.rb              text eol=lf diff=ruby
 *.sass            text eol=lf
 *.scm             text eol=lf
 *.scss            text eol=lf diff=css
-*.sh              text eol=lf eol=lf
-.husky/*          text eol=lf eol=lf
+*.sh              text eol=lf
+.husky/*          text eol=lf
 *.sql             text eol=lf
 *.styl            text eol=lf
 *.tag             text eol=lf
@@ -57,7 +57,7 @@
 Dockerfile        text eol=lf
 
 # Documentation
-*.ipynb           text eol=lf eol=lf
+*.ipynb           text eol=lf
 *.markdown        text eol=lf diff=markdown
 *.md              text eol=lf diff=markdown
 *.mdwn            text eol=lf diff=markdown
@@ -111,9 +111,9 @@ TODO              text eol=lf
 .gitconfig        text eol=lf
 .htaccess         text eol=lf
 *.lock            text eol=lf -diff
-package.json      text eol=lf eol=lf
-package-lock.json text eol=lf eol=lf -diff
-pnpm-lock.yaml    text eol=lf eol=lf -diff
+package.json      text eol=lf
+package-lock.json text eol=lf -diff
+pnpm-lock.yaml    text eol=lf -diff
 .prettierrc       text eol=lf
 yarn.lock         text eol=lf -diff
 *.toml            text eol=lf
