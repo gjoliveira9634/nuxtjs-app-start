@@ -1,0 +1,17 @@
+{
+	"site": {
+		"name": "Nuxt App Starter",
+		"tagline": "Starter with UI, Content, SEO and best practices, ready to scale.",
+		"blog": "Blog",
+		"home": "Home",
+		"docs": "Nuxt Documentation",
+		"goToBlog": "Go to blog",
+		"footerBlog": "Visit the blog"
+	},
+	"hero": {
+		"title": "Build fast with Nuxt"
+	},
+	"errors": {
+		"postNotFound": "Post not found"
+	}
+}

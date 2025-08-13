@@ -1,0 +1,10 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Nuxt Dev",
+			"type": "shell",
+			"command": "npm run nuxt:dev"
+		}
+	]
+}
