@@ -2,7 +2,7 @@
 	const route = useRoute();
 	const { t, locale } = useI18n();
 	const localePath = useLocalePath();
-	const config = useRuntimeConfig();
+	const requestURL = useRequestURL();
 
 	// Resolve o caminho do documento conforme o locale atual
 	const path = computed(() => {
@@ -18,7 +18,7 @@
 			const item = await queryCollection("posts")
 				.where("path", "=", path.value)
 				.first();
-			return item as any;
+			return item;
 		},
 		{ watch: [path] },
 	);
@@ -33,16 +33,10 @@
 
 		// SEO por post
 		useSeoMeta({
-			title: (doc.value as any).title,
-			description:
-				(doc.value as any).excerpt
-				|| (doc.value as any).description
-				|| undefined,
-			ogTitle: (doc.value as any).title,
-			ogDescription:
-				(doc.value as any).excerpt
-				|| (doc.value as any).description
-				|| undefined,
+			title: doc.value.title,
+			description: doc.value.excerpt || doc.value.description || undefined,
+			ogTitle: doc.value.title,
+			ogDescription: doc.value.excerpt || doc.value.description || undefined,
 		});
 
 		// JSON-LD Article básico com URL canônica do locale
@@ -53,18 +47,18 @@
 					innerHTML: JSON.stringify({
 						"@context": "https://schema.org",
 						"@type": "Article",
-						"headline": (doc.value as any).title,
-						"datePublished": (doc.value as any).date,
+						"headline": doc.value.title,
+						"datePublished": doc.value.date,
 						"mainEntityOfPage": {
 							"@type": "WebPage",
 							"@id": new URL(
 								localePath(
-									((doc.value as any).path as string).replace(
+									(doc.value.path as string).replace(
 										/^\/[^/]+\/posts/,
 										"/blog",
 									),
 								),
-								config.public.siteUrl,
+								requestURL.origin,
 							).toString(),
 						},
 					}),
@@ -79,7 +73,7 @@
 				dateStyle: "medium",
 			}).format(new Date(d));
 		} catch {
-			return new Date(d as any).toLocaleDateString();
+			return new Date(d).toLocaleDateString();
 		}
 	}
 </script>
@@ -88,11 +82,11 @@
 	<article
 		v-if="doc"
 		class="prose dark:prose-invert mx-auto max-w-3xl py-10">
-		<h1 class="mb-2">{{ (doc as any).title }}</h1>
+		<h1 class="mb-2">{{ doc.title }}</h1>
 		<p class="mt-0 text-sm text-gray-500">
-			{{ formatDate((doc as any).date) }}
+			{{ formatDate(doc.date as string) }}
 		</p>
 		<!-- O body já vem renderizável via ContentRenderer se presente -->
-		<ContentRenderer :value="doc as any" />
+		<ContentRenderer :value="doc" />
 	</article>
 </template>

@@ -1,5 +1,5 @@
 ---
-title: "Hola Mundo"
+title: "Hola Mundo!"
 date: 2025-08-01
 excerpt: "Bienvenido al mini blog con Nuxt Content."
 cover: "/cover/hello-world.jpg"

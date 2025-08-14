@@ -41,7 +41,7 @@
 				dateStyle: "medium",
 			}).format(new Date(d));
 		} catch {
-			return new Date(d as any).toLocaleDateString();
+			return new Date(d).toLocaleDateString();
 		}
 	}
 </script>

@@ -1,4 +1,3 @@
-````mdc
 ---
 title: "Astuces Nuxt Content"
 date: 2025-08-05
@@ -14,10 +13,9 @@ tags: [nuxt, content]
 
 ## Rendu
 
-Utilisez le composant `<ContentRenderer />` pour afficher le corps de l'article :
+Utilisez le composant `<ContentRenderer />` pour afficher le corps de l'article
+:
 
 ```vue
 <ContentRenderer :value="doc" />
 ```
-
-````
