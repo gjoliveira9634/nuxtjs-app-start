@@ -1,7 +1,7 @@
 import {
-	defineCollection,
-	defineContentConfig,
-	z as type,
+  defineCollection,
+  defineContentConfig,
+  z as type,
 } from "@nuxt/content";
 
 // 🎯 Tipos avançados e reutilizáveis
@@ -34,7 +34,7 @@ export default defineContentConfig({
 	collections: {
 		posts: defineCollection({
 			type: "page",
-			source: "**/posts/**/*.md",
+			source: "posts/*/*.md",
 			schema: type.object({
 				// 📝 Conteúdo Principal
 				title: type
@@ -57,10 +57,7 @@ export default defineContentConfig({
 					.describe("Resumo executivo do post"),
 
 				// 🗓️ Datas e Status
-				date: type.coerce
-					.date()
-					.default(() => new Date())
-					.describe("Data de publicação"),
+				date: type.coerce.date().describe("Data de publicação"),
 
 				updatedAt: type.coerce.date().optional().describe("Última atualização"),
 
@@ -176,9 +173,10 @@ export default defineContentConfig({
 
 				language: type
 					.string()
-					.length(2, "Código de idioma deve ter 2 caracteres")
-					.default("pt")
-					.describe("Idioma do post (ISO 639-1)"),
+					.min(2)
+					.max(10)
+					.default("pt-BR")
+					.describe("Locale do post (ex.: en-US, pt-BR)"),
 
 				// 🔧 Técnico e Funcionalidades
 				toc: type.boolean().default(true).describe("Exibir índice"),
@@ -231,7 +229,7 @@ export default defineContentConfig({
 		// 🏷️ Coleção de Categorias
 		categories: defineCollection({
 			type: "data",
-			source: "categories/*.json",
+			source: "categories/*/*.json",
 			schema: type.object({
 				name: type.string().min(2, "Nome muito curto"),
 				description: type.string().max(300),
@@ -247,7 +245,7 @@ export default defineContentConfig({
 		// 👤 Coleção de Autores
 		authors: defineCollection({
 			type: "data",
-			source: "authors/*.json",
+			source: "authors/*/*.json",
 			schema: type.object({
 				name: type.string().min(2),
 				email: type.string().email(),
@@ -269,7 +267,7 @@ export default defineContentConfig({
 		// 📚 Coleção de Séries
 		series: defineCollection({
 			type: "data",
-			source: "series/*.json",
+			source: "series/*/*.json",
 			schema: type.object({
 				title: type.string().min(3),
 				description: type.string().max(300),

@@ -1,4 +1,5 @@
 ---
+title: "Astuces pour Nuxt Content"
 seo:
   slug: astuces-nuxt-content
   twitterCard: summary_large_image
