@@ -7,8 +7,8 @@
 	// Resolve o caminho do documento conforme o locale atual
 	const path = computed(() => {
 		const slug = (route.params.slug as string[]).join("/");
-		// Agora todos os conteúdos ficam em /<locale>/posts (locale salvo em minúsculas no BD)
-		return `/${locale.value.toLowerCase()}/posts/${slug}`;
+		// Conteúdo fica em /<locale>/posts usando o locale exatamente como definido (ex.: en-US, pt-BR)
+		return `/${locale.value}/posts/${slug}`;
 	});
 
 	const { data: doc } = await useAsyncData(

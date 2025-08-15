@@ -1,4 +1,5 @@
 ---
+title: "Bonjour le monde!"
 seo:
   slug: bonjour-le-monde
   twitterCard: summary_large_image
@@ -15,12 +16,13 @@ author:
   name: "Équipe"
   bio: "Contenu de démonstration."
 description:
-  "Bienvenue sur le mini blog avec Nuxt Content. Dans cet article, nous
-  présentons la structure, comment écrire en Markdown et comment naviguer dans
-  les articles simplement et efficacement."
+  "Bienvenue sur le mini blog avec Nuxt Content. Découvrez la structure, comment
+  écrire en Markdown et comment le routage transforme vos articles en pages
+  claires."
 excerpt:
-  "Bienvenue sur le mini blog avec Nuxt Content. Apprenez à écrire en Markdown,
-  indexer le contenu et naviguer dans `/blog/<slug>` facilement."
+  "Bienvenue sur le mini blog avec Nuxt Content. Dans ce premier article, voyez
+  comment le contenu est organisé, indexé et rendu, et comment naviguer sur
+  /blog/<slug> facilement."
 date: 2025-08-01
 categories: ["introduction"]
 tags: ["intro"]

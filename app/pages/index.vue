@@ -5,8 +5,6 @@
 	const title = computed(() => t("site.name"));
 	const description = computed(() => t("site.tagline"));
 
-	const test = useAppConfig();
-
 	useSeoMeta({
 		title,
 		description,
