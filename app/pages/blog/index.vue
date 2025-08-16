@@ -16,7 +16,7 @@
 			try {
 				// Consulta todos os posts do locale atual usando queryCollection e ordena por data (desc)
 				const all = await queryCollection("posts")
-					.where("path", "LIKE", `/${locale.value}/posts/%`)
+					.where("path", "LIKE", `/posts/${locale.value.toLowerCase()}/%`)
 					.order("date", "DESC")
 					.all();
 				// Oculta posts marcados como rascunho
@@ -31,8 +31,8 @@
 
 	function toBlogPath(p: string) {
 		// Remove o prefixo do idioma e substitui /posts por /blog
-		// Exemplo: /pt-br/posts/hello-world -> /blog/hello-world
-		return p.replace(/^\/[^\/]+\/posts/, "/blog");
+		// Exemplo: /posts/pt-BR/hello-world -> /blog/hello-world
+		return p.replace(/^\/posts\/[^/]+/, "/blog");
 	}
 
 	function formatDate(d: string | number | Date) {

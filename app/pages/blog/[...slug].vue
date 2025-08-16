@@ -7,12 +7,18 @@
 	// Resolve o caminho do documento conforme o locale atual
 	const path = computed(() => {
 		const slug = (route.params.slug as string[]).join("/");
-		// Agora todos os conteúdos ficam em /<locale>/posts (locale salvo em minúsculas no BD)
-		return `/${locale.value.toLowerCase()}/posts/${slug}`;
+		// No banco do @nuxt/content os paths usam locale em minúsculas
+		const localeLower = locale.value.toLowerCase();
+		// Conteúdo fica em /posts/<locale>/<slug>
+		return `/posts/${localeLower}/${slug}`;
 	});
 
-	const { data: doc } = await useAsyncData(
-		`post:${path.value}`,
+	const {
+		data: doc,
+		pending,
+		error,
+	} = await useAsyncData(
+		() => `post:${path.value}`,
 		async () => {
 			// Busca o item da coleção "posts" pelo path resolvido
 			const item = await queryCollection("posts")
@@ -24,6 +30,8 @@
 	);
 
 	watchEffect(() => {
+		// Aguarda a busca terminar antes de decidir 404
+		if (pending.value) return;
 		if (!doc.value) {
 			throw createError({
 				statusCode: 404,
@@ -31,16 +39,30 @@
 			});
 		}
 
-		// SEO por post
+		// SEO por post (executa somente se doc existir)
 		useSeoMeta({
 			title: doc.value.title,
 			description: doc.value.excerpt || doc.value.description || undefined,
 			ogTitle: doc.value.title,
 			ogDescription: doc.value.excerpt || doc.value.description || undefined,
+			ogImage: doc.value.seo?.ogImage,
+			twitterCard: doc.value.seo?.twitterCard,
+			robots: doc.value.seo?.noindex ? "noindex, nofollow" : undefined,
 		});
+
+		// Link canônico (usa seo.canonical se existir, senão gera a partir da rota atual)
+		const canonical =
+			doc.value.seo?.canonical
+			|| new URL(
+				localePath(
+					(doc.value.path as string).replace(/^\/posts\/[^/]+/, "/blog"),
+				),
+				requestURL.origin,
+			).toString();
 
 		// JSON-LD Article básico com URL canônica do locale
 		useHead({
+			link: [{ rel: "canonical", href: canonical }],
 			script: [
 				{
 					type: "application/ld+json",
@@ -51,20 +73,23 @@
 						"datePublished": doc.value.date,
 						"mainEntityOfPage": {
 							"@type": "WebPage",
-							"@id": new URL(
-								localePath(
-									(doc.value.path as string).replace(
-										/^\/[^/]+\/posts/,
-										"/blog",
-									),
-								),
-								requestURL.origin,
-							).toString(),
+							"@id": canonical,
 						},
 					}),
 				},
 			],
 		});
+	});
+
+	// Evita exibir conteúdo de rascunho diretamente pela rota
+	watchEffect(() => {
+		if (pending.value) return;
+		if (doc.value && doc.value.draft) {
+			throw createError({
+				statusCode: 404,
+				message: t("errors.postNotFound") as string,
+			});
+		}
 	});
 
 	function formatDate(d: string | number | Date) {
