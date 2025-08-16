@@ -59,7 +59,10 @@ export default defineNuxtConfig({
 				|| ((process.env.NODE_ENV as string) === "development" ?
 					"postgresql://user:password@127.0.0.1:5432/postgres"
 				:	(() => {
-						throw new Error("POSTGRES_URL has not been defined!");
+						throw new Error(
+							`Warning: "POSTGRES_URL" has not been defined!
+              Please, set it in your environment variables.`,
+						);
 					})()),
 		},
 	},
