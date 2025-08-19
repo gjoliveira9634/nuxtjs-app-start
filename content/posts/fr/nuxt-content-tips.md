@@ -9,7 +9,9 @@ seo:
 cover:
   image: "https://images.unsplash.com/photo-1729575846511-f499d2e17d79?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmFzaWMlMjBiYWNrZ3JvdW5kfGVufDB8fDB8fHww"
   alt: "Illustration d'astuces pour Nuxt Content"
-
+author:
+  name: "Équipe"
+  bio: "Contenu de démonstration."
 description:
   "Comment organiser vos articles, configurer le frontmatter avec SEO et
   afficher le corps avec ContentRenderer, en suivant le schéma du projet."
