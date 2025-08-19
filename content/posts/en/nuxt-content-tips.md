@@ -4,10 +4,10 @@ seo:
   slug: nuxt-content-tips
   twitterCard: summary_large_image
   keywords: ["nuxt", "content", "tips"]
-  ogImage: "https://example.com/images/nuxt-content-tips-og.jpg"
+  ogImage: "https://images.unsplash.com/photo-1729575846511-f499d2e17d79?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmFzaWMlMjBiYWNrZ3JvdW5kfGVufDB8fDB8fHww"
   canonical: "https://example.com/en/blog/nuxt-content-tips"
 cover:
-  image: "https://example.com/images/nuxt-content-tips-cover.jpg"
+  image: "https://images.unsplash.com/photo-1729575846511-f499d2e17d79?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmFzaWMlMjBiYWNrZ3JvdW5kfGVufDB8fDB8fHww"
   alt: "Illustration of tips for Nuxt Content"
 
 description:

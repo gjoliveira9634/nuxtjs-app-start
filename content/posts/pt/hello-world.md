@@ -4,11 +4,11 @@ seo:
   slug: ola-mundo
   twitterCard: summary_large_image
   keywords: ["introducao", "blog", "nuxt"]
-  ogImage: "https://example.com/images/ola-mundo-og.jpg"
+  ogImage: "https://images.unsplash.com/photo-1729575846511-f499d2e17d79?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmFzaWMlMjBiYWNrZ3JvdW5kfGVufDB8fDB8fHww"
   canonical: "https://example.com/pt/blog/ola-mundo"
   noindex: false
 cover:
-  image: "https://example.com/images/cover-ola-mundo.jpg"
+  image: "https://images.unsplash.com/photo-1729575846511-f499d2e17d79?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmFzaWMlMjBiYWNrZ3JvdW5kfGVufDB8fDB8fHww"
   alt: "Capa com texto Olá Mundo sobre fundo colorido"
   caption: "Primeiro post do blog"
   credit: "Foto por Example"
