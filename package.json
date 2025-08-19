@@ -21,6 +21,7 @@
 		"@nuxt/ui": "latest",
 		"@nuxtjs/i18n": "latest",
 		"@nuxtjs/seo": "latest",
+		"better-sqlite3": "latest",
 		"nuxt": "latest",
 		"pg": "latest",
 		"vite": "latest",
