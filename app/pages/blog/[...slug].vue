@@ -49,7 +49,8 @@
 	);
 
 	function toRelatedBlogPath(p: any) {
-		const raw = p?.seo?.slug || (p?.path as string)?.replace(/^\/posts\/[^/]+\//, "");
+		const raw =
+			p?.seo?.slug || (p?.path as string)?.replace(/^\/posts\/[^/]+\//, "");
 		return localePath(`/blog/${raw}`);
 	}
 
@@ -91,22 +92,23 @@
 			innerHTML: JSON.stringify({
 				"@context": "https://schema.org",
 				"@type": "Article",
-				headline: doc.value.title,
-				datePublished: doc.value.date,
-				image: doc.value.cover?.image,
-				author: doc.value.author
-					? {
-						"@type": "Person",
-						name: doc.value.author.name,
-						sameAs: [
-							doc.value.author.social?.twitter,
-							doc.value.author.social?.github,
-							doc.value.author.social?.linkedin,
-							doc.value.author.social?.website,
-						].filter(Boolean),
-					}
-					: undefined,
-				mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
+				"headline": doc.value.title,
+				"datePublished": doc.value.date,
+				"image": doc.value.cover?.image,
+				"author":
+					doc.value.author ?
+						{
+							"@type": "Person",
+							"name": doc.value.author.name,
+							"sameAs": [
+								doc.value.author.social?.twitter,
+								doc.value.author.social?.github,
+								doc.value.author.social?.linkedin,
+								doc.value.author.social?.website,
+							].filter(Boolean),
+						}
+					:	undefined,
+				"mainEntityOfPage": { "@type": "WebPage", "@id": canonical },
 			}),
 		});
 
@@ -118,10 +120,25 @@
 			innerHTML: JSON.stringify({
 				"@context": "https://schema.org",
 				"@type": "BreadcrumbList",
-				itemListElement: [
-					{ "@type": "ListItem", position: 1, name: t("site.home"), item: homeUrl },
-					{ "@type": "ListItem", position: 2, name: t("site.blog"), item: blogUrl },
-					{ "@type": "ListItem", position: 3, name: doc.value.title, item: thisUrl },
+				"itemListElement": [
+					{
+						"@type": "ListItem",
+						"position": 1,
+						"name": t("site.home"),
+						"item": homeUrl,
+					},
+					{
+						"@type": "ListItem",
+						"position": 2,
+						"name": t("site.blog"),
+						"item": blogUrl,
+					},
+					{
+						"@type": "ListItem",
+						"position": 3,
+						"name": doc.value.title,
+						"item": thisUrl,
+					},
 				],
 			}),
 		});
@@ -206,20 +223,31 @@
 					#{{ tag }}
 				</span>
 			</div>
-			<div v-if="doc.categories?.length" class="text-sm text-gray-600">
-				<strong>{{ $t('post.categories') }}:</strong> {{ doc.categories.join(", ") }}
+			<div
+				v-if="doc.categories?.length"
+				class="text-sm text-gray-600">
+				<strong>{{ $t("post.categories") }}:</strong>
+				{{ doc.categories.join(", ") }}
 			</div>
-			<div v-if="doc.series" class="text-sm text-gray-600">
-				<strong>{{ $t('post.series') }}:</strong> {{ doc.series }}
+			<div
+				v-if="doc.series"
+				class="text-sm text-gray-600">
+				<strong>{{ $t("post.series") }}:</strong> {{ doc.series }}
 				<span v-if="doc.seriesOrder"> · #{{ doc.seriesOrder }}</span>
 			</div>
 
-			<div v-if="related?.length" class="mt-6">
-				<h2 class="mb-3 text-lg font-semibold">{{ $t('post.related') }}</h2>
+			<div
+				v-if="related?.length"
+				class="mt-6">
+				<h2 class="mb-3 text-lg font-semibold">{{ $t("post.related") }}</h2>
 				<ul class="space-y-2">
-					<li v-for="p in related" :key="p.path">
-						<NuxtLink :to="toRelatedBlogPath(p)" class="hover:underline">
-							{{ p.title || p.path.split('/').pop() }}
+					<li
+						v-for="p in related"
+						:key="p.path">
+						<NuxtLink
+							:to="toRelatedBlogPath(p)"
+							class="hover:underline">
+							{{ p.title || p.path.split("/").pop() }}
 						</NuxtLink>
 					</li>
 				</ul>
