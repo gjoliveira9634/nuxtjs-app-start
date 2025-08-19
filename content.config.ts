@@ -137,26 +137,24 @@ export default defineContentConfig({
 					.optional(),
 
 				// 🔗 SEO e Meta
-				seo: type
-					.object({
-						slug: SlugSchema.optional().describe("URL slug personalizada"),
-						canonical: UrlSchema.optional().describe("URL canônica"),
-						noindex: type
-							.boolean()
-							.default(false)
-							.describe("Não indexar no Google"),
-						keywords: type
-							.array(type.string().min(2).max(30))
-							.max(15, "Máximo de 15 palavras-chave")
-							.default([])
-							.describe("Palavras-chave SEO"),
-						ogImage: UrlSchema.optional().describe("Imagem Open Graph"),
-						twitterCard: type
-							.enum(["summary", "summary_large_image", "app", "player"])
-							.default("summary_large_image")
-							.describe("Tipo do Twitter Card"),
-					})
-					.optional(),
+				seo: type.object({
+					slug: SlugSchema.describe("URL slug personalizada (obrigatória)"),
+					canonical: UrlSchema.optional().describe("URL canônica"),
+					noindex: type
+						.boolean()
+						.default(false)
+						.describe("Não indexar no Google"),
+					keywords: type
+						.array(type.string().min(2).max(30))
+						.max(15, "Máximo de 15 palavras-chave")
+						.default([])
+						.describe("Palavras-chave SEO"),
+					ogImage: UrlSchema.optional().describe("Imagem Open Graph"),
+					twitterCard: type
+						.enum(["summary", "summary_large_image", "app", "player"])
+						.default("summary_large_image")
+						.describe("Tipo do Twitter Card"),
+				}),
 
 				// 📊 Métricas e Engagement
 				readingTime: type
@@ -175,7 +173,7 @@ export default defineContentConfig({
 					.string()
 					.min(2)
 					.max(10)
-					.default("pt")
+					.default("en")
 					.describe("Locale do post (ex.: en, pt)"),
 
 				// 🔧 Técnico e Funcionalidades

@@ -20,11 +20,21 @@
 	} = await useAsyncData(
 		() => `post:${path.value}`,
 		async () => {
-			// Busca o item da coleção "posts" pelo path resolvido
-			const item = await queryCollection("posts")
+			// 1) Tenta buscar por path exato
+			const exact = await queryCollection("posts")
 				.where("path", "=", path.value)
 				.first();
-			return item;
+			if (exact) return exact;
+			// 2) Se não encontrou, tenta por seo.slug (rota amigável)
+			// Observação: evitar usar campo aninhado no WHERE do SQLite.
+			// Em vez disso, restringe pelo locale via path e filtra em JS pelo seo.slug.
+			const slug = (route.params.slug as string[]).join("/");
+			const localeLower = locale.value.toLowerCase();
+			const candidates = await queryCollection("posts")
+				.where("path", "LIKE", `/posts/${localeLower}/%`)
+				.all();
+			const bySlug = candidates.find((p: any) => p?.seo?.slug === slug);
+			return bySlug || null;
 		},
 		{ watch: [path] },
 	);
@@ -238,19 +248,39 @@
 
 			<div
 				v-if="related?.length"
-				class="mt-6">
-				<h2 class="mb-3 text-lg font-semibold">{{ $t("post.related") }}</h2>
-				<ul class="space-y-2">
-					<li
+				class="mt-8">
+				<h2 class="mb-4 text-lg font-semibold">{{ $t("post.related") }}</h2>
+				<div class="grid gap-6 sm:grid-cols-2">
+					<article
 						v-for="p in related"
-						:key="p.path">
+						:key="p.path"
+						class="overflow-hidden rounded-lg border bg-white dark:border-gray-800 dark:bg-gray-900">
 						<NuxtLink
 							:to="toRelatedBlogPath(p)"
-							class="hover:underline">
-							{{ p.title || p.path.split("/").pop() }}
+							class="block">
+							<div class="aspect-[16/9] w-full bg-gray-100 dark:bg-gray-800">
+								<img
+									v-if="p.cover?.image"
+									:src="p.cover.image"
+									:alt="p.cover?.alt || p.title"
+									class="h-full w-full object-cover" />
+							</div>
+							<div class="p-4">
+								<h3 class="line-clamp-2 text-base font-semibold">
+									{{ p.title || p.path.split("/").pop() }}
+								</h3>
+								<p class="mt-1 text-xs text-gray-500">
+									{{ p.date ? formatDate(p.date) : "" }}
+								</p>
+								<p
+									v-if="p.excerpt || p.description"
+									class="mt-2 line-clamp-3 text-sm text-gray-700 dark:text-gray-300">
+									{{ p.excerpt || p.description }}
+								</p>
+							</div>
 						</NuxtLink>
-					</li>
-				</ul>
+					</article>
+				</div>
 			</div>
 		</footer>
 	</article>
