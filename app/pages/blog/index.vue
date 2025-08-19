@@ -1,6 +1,7 @@
 <script setup lang="ts">
 	const { t, locale } = useI18n();
 	const localePath = useLocalePath();
+
 	const title = computed(() => t("site.blog"));
 	const description = computed(() => t("site.tagline"));
 	useSeoMeta({
@@ -8,6 +9,20 @@
 		description,
 		ogTitle: title,
 		ogDescription: description,
+		twitterCard: "summary_large_image",
+		twitterSite: "@nuxt_js",
+		ogImage: "/og.jpg",
+	});
+
+	// i18n SEO alternates
+	const i18nHead = useLocaleHead({ addSeoAttributes: true } as any);
+	watchEffect(() => {
+		const v = (i18nHead as any).value || {};
+		useHead({
+			htmlAttrs: v.htmlAttrs || {},
+			link: v.link || [],
+			meta: v.meta || [],
+		});
 	});
 
 	const { data: posts } = await useAsyncData(
@@ -31,7 +46,7 @@
 
 	function toBlogPath(p: string) {
 		// Remove o prefixo do idioma e substitui /posts por /blog
-		// Exemplo: /posts/pt-BR/hello-world -> /blog/hello-world
+		// Exemplo: /posts/pt/hello-world -> /blog/hello-world
 		return p.replace(/^\/posts\/[^/]+/, "/blog");
 	}
 

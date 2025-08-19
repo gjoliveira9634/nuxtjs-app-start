@@ -7,7 +7,7 @@
 	// Resolve o caminho do documento conforme o locale atual
 	const path = computed(() => {
 		const slug = (route.params.slug as string[]).join("/");
-		// No banco do @nuxt/content os paths usam locale em minúsculas
+		// No conteúdo, usamos códigos genéricos em minúsculas (en, es, fr, pt)
 		const localeLower = locale.value.toLowerCase();
 		// Conteúdo fica em /posts/<locale>/<slug>
 		return `/posts/${localeLower}/${slug}`;
@@ -107,11 +107,68 @@
 	<article
 		v-if="doc"
 		class="prose dark:prose-invert mx-auto max-w-3xl py-10">
-		<h1 class="mb-2">{{ doc.title }}</h1>
-		<p class="mt-0 text-sm text-gray-500">
-			{{ formatDate(doc.date as string) }}
-		</p>
-		<!-- O body já vem renderizável via ContentRenderer se presente -->
+		<header class="not-prose mb-6">
+			<h1 class="mb-2 text-3xl font-semibold">{{ doc.title }}</h1>
+			<p class="mt-0 text-sm text-gray-500">
+				{{ formatDate(doc.date as string) }}
+			</p>
+			<div
+				v-if="doc.cover"
+				class="mt-4">
+				<img
+					:src="doc.cover.image"
+					:alt="doc.cover.alt"
+					class="w-full rounded" />
+				<p
+					v-if="doc.cover.caption"
+					class="mt-1 text-xs text-gray-500">
+					{{ doc.cover.caption }}
+					<span v-if="doc.cover.credit"> · {{ doc.cover.credit }}</span>
+				</p>
+			</div>
+			<div
+				v-if="doc.author"
+				class="mt-4 flex items-center gap-3">
+				<img
+					v-if="doc.author.avatar"
+					:src="doc.author.avatar"
+					:alt="doc.author.name"
+					class="h-10 w-10 rounded-full object-cover" />
+				<div>
+					<p class="text-sm font-medium">{{ doc.author.name }}</p>
+					<p
+						v-if="doc.author.bio"
+						class="text-xs text-gray-500">
+						{{ doc.author.bio }}
+					</p>
+				</div>
+			</div>
+		</header>
+
 		<ContentRenderer :value="doc" />
+
+		<footer class="not-prose mt-8 space-y-4">
+			<div
+				v-if="doc.tags?.length"
+				class="flex flex-wrap gap-2">
+				<span
+					v-for="tag in doc.tags"
+					:key="tag"
+					class="rounded bg-gray-100 px-2 py-1 text-xs dark:bg-gray-800">
+					#{{ tag }}
+				</span>
+			</div>
+			<div
+				v-if="doc.categories?.length"
+				class="text-sm text-gray-600">
+				<strong>Categories:</strong> {{ doc.categories.join(", ") }}
+			</div>
+			<div
+				v-if="doc.series"
+				class="text-sm text-gray-600">
+				<strong>Series:</strong> {{ doc.series }}
+				<span v-if="doc.seriesOrder"> · #{{ doc.seriesOrder }}</span>
+			</div>
+		</footer>
 	</article>
 </template>

@@ -1,9 +1,26 @@
 <script setup lang="ts">
 	const year = new Date().getFullYear();
 	const { t, locale, locales } = useI18n();
-	type LocaleCode = "pt-BR" | "es-MX" | "en-US";
-	const switchLocalePath = useSwitchLocalePath();
+	// Códigos de idioma agora são genéricos (en, es, fr, pt)
+	type LocaleCode = string;
+	const switchLocalePath = useSwitchLocalePath() as unknown as (
+		code: string,
+	) => string;
 	const localePath = useLocalePath();
+	// SEO multilíngue: adiciona html lang/dir, alternates e metatags do i18n
+	const i18nHead = useLocaleHead({
+		addDirAttribute: true,
+		addSeoAttributes: true,
+		identifierAttribute: "hid",
+	} as any);
+	watchEffect(() => {
+		const v = (i18nHead as any).value || {};
+		useHead({
+			htmlAttrs: v.htmlAttrs || {},
+			link: v.link || [],
+			meta: v.meta || [],
+		});
+	});
 	const availableLocales = computed(() =>
 		(locales.value as Array<{ code: string; name?: string }>).map((l) => ({
 			code: l.code,

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-	const { t } = useI18n();
+	const { t, locale } = useI18n();
 	const localePath = useLocalePath();
 
 	const title = computed(() => t("site.name"));
@@ -12,6 +12,20 @@
 		ogDescription: description,
 		ogImage: "/og.jpg",
 		twitterCard: "summary_large_image",
+		// Extras
+		twitterSite: "@nuxt_js",
+		ogLocale: locale,
+	});
+
+	// Hreflang alternates e html attrs via i18n
+	const i18nHead = useLocaleHead({ addSeoAttributes: true } as any);
+	watchEffect(() => {
+		const v = (i18nHead as any).value || {};
+		useHead({
+			htmlAttrs: v.htmlAttrs || {},
+			link: v.link || [],
+			meta: v.meta || [],
+		});
 	});
 </script>
 

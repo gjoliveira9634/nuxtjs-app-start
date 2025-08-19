@@ -5,7 +5,7 @@ seo:
   twitterCard: summary_large_image
   keywords: ["introducao", "blog", "nuxt"]
   ogImage: "https://example.com/images/ola-mundo-og.jpg"
-  canonical: "https://example.com/pt-br/blog/ola-mundo"
+  canonical: "https://example.com/pt/blog/ola-mundo"
   noindex: false
 cover:
   image: "https://example.com/images/cover-ola-mundo.jpg"

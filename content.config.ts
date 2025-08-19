@@ -1,7 +1,7 @@
 import {
-  defineCollection,
-  defineContentConfig,
-  z as type,
+	defineCollection,
+	defineContentConfig,
+	z as type,
 } from "@nuxt/content";
 
 // 🎯 Tipos avançados e reutilizáveis
@@ -175,8 +175,8 @@ export default defineContentConfig({
 					.string()
 					.min(2)
 					.max(10)
-					.default("pt-BR")
-					.describe("Locale do post (ex.: en-US, pt-BR)"),
+					.default("pt")
+					.describe("Locale do post (ex.: en, pt)"),
 
 				// 🔧 Técnico e Funcionalidades
 				toc: type.boolean().default(true).describe("Exibir índice"),

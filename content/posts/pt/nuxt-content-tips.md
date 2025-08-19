@@ -5,7 +5,7 @@ seo:
   twitterCard: summary_large_image
   keywords: ["nuxt", "content", "dicas"]
   ogImage: "https://example.com/images/nuxt-content-tips-og.jpg"
-  canonical: "https://example.com/pt-br/blog/dicas-nuxt-content"
+  canonical: "https://example.com/pt/blog/dicas-nuxt-content"
 cover:
   image: "https://example.com/images/nuxt-content-tips-cover.jpg"
   alt: "Ilustração de dicas para Nuxt Content"
