@@ -29,6 +29,11 @@ export default defineNuxtConfig({
 			{ code: "pt", name: "Português", language: "pt", file: "pt.json" },
 		],
 		defaultLocale: "en",
+		// Necessário para gerar links absolutos válidos nos hreflang/canonical via useLocaleHead
+		baseUrl:
+			(process.env.NUXT_PUBLIC_SITE_URL as string)
+			|| (process.env.SITE_URL as string)
+			|| "http://localhost:3000",
 		langDir: "../app/assets/i18n",
 	},
 	content: {

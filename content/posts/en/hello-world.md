@@ -4,11 +4,11 @@ seo:
   slug: hello-world
   twitterCard: summary_large_image
   keywords: ["introduction", "blog", "nuxt"]
-  ogImage: "https://example.com/images/hello-world-og.jpg"
+  ogImage: "https://images.unsplash.com/photo-1729575846511-f499d2e17d79?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmFzaWMlMjBiYWNrZ3JvdW5kfGVufDB8fDB8fHww"
   canonical: "https://example.com/en/blog/hello-world"
   noindex: false
 cover:
-  image: "https://example.com/images/cover-hello-world.jpg"
+  image: "https://images.unsplash.com/photo-1729575846511-f499d2e17d79?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmFzaWMlMjBiYWNrZ3JvdW5kfGVufDB8fDB8fHww"
   alt: "Cover with Hello World text on colorful background"
   caption: "First blog post"
   credit: "Photo by Example"

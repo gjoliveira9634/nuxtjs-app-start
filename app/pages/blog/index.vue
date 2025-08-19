@@ -50,6 +50,12 @@
 		return p.replace(/^\/posts\/[^/]+/, "/blog");
 	}
 
+	function toBlogPathFromDoc(p: any) {
+		const raw =
+			p?.seo?.slug || (p?.path as string)?.replace(/^\/posts\/[^/]+\//, "");
+		return localePath(`/blog/${raw}`);
+	}
+
 	function formatDate(d: string | number | Date) {
 		try {
 			return new Intl.DateTimeFormat(locale.value, {
@@ -64,25 +70,34 @@
 <template>
 	<div class="container mx-auto py-10">
 		<h1 class="mb-6 text-3xl font-semibold">{{ $t("site.blog") }}</h1>
-		<ul class="space-y-4">
-			<li
+		<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+			<article
 				v-for="post in posts"
 				:key="post.path"
-				class="border-b pb-4">
-				<NuxtLink
-					:to="localePath(toBlogPath(post.path))"
-					class="text-xl font-medium hover:underline">
-					{{ post.title || post.path.split("/").pop() }}
+				class="overflow-hidden rounded-lg border bg-white dark:border-gray-800 dark:bg-gray-900">
+				<NuxtLink :to="toBlogPathFromDoc(post)" class="block">
+					<div class="aspect-[16/9] w-full bg-gray-100 dark:bg-gray-800">
+						<img
+							v-if="post.cover?.image"
+							:src="post.cover.image"
+							:alt="post.cover?.alt || post.title"
+							class="h-full w-full object-cover" />
+					</div>
+					<div class="p-4">
+						<h2 class="line-clamp-2 text-lg font-semibold">
+							{{ post.title || post.path.split('/').pop() }}
+						</h2>
+						<p class="mt-1 text-xs text-gray-500">
+							{{ post.date ? formatDate(post.date) : '' }}
+						</p>
+						<p
+							v-if="post.excerpt || post.description"
+							class="mt-2 line-clamp-3 text-sm text-gray-700 dark:text-gray-300">
+							{{ post.excerpt || post.description }}
+						</p>
+					</div>
 				</NuxtLink>
-				<div class="text-sm text-gray-500">
-					{{ post.date ? formatDate(post.date) : "" }}
-				</div>
-				<p
-					v-if="post.excerpt || post.description"
-					class="mt-2 text-gray-700"
-					>{{ post.excerpt || post.description }}</p
-				>
-			</li>
-		</ul>
+			</article>
+		</div>
 	</div>
 </template>

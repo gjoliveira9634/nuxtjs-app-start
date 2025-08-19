@@ -4,11 +4,11 @@ seo:
   slug: hola-mundo
   twitterCard: summary_large_image
   keywords: ["introduccion", "blog", "nuxt"]
-  ogImage: "https://example.com/images/hola-mundo-og.jpg"
+  ogImage: "https://images.unsplash.com/photo-1729575846511-f499d2e17d79?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmFzaWMlMjBiYWNrZ3JvdW5kfGVufDB8fDB8fHww"
   canonical: "https://example.com/es/blog/hola-mundo"
   noindex: false
 cover:
-  image: "https://example.com/images/cover-hola-mundo.jpg"
+  image: "https://images.unsplash.com/photo-1729575846511-f499d2e17d79?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmFzaWMlMjBiYWNrZ3JvdW5kfGVufDB8fDB8fHww"
   alt: "Portada con texto Hola Mundo sobre fondo colorido"
   caption: "Primer post del blog"
   credit: "Foto por Example"
