@@ -13,5 +13,10 @@
 	},
 	"errors": {
 		"postNotFound": "Post não encontrado"
+	},
+	"post": {
+		"categories": "Categorias",
+		"series": "Série",
+		"related": "Posts relacionados"
 	}
 }

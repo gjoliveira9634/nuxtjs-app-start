@@ -29,6 +29,30 @@
 		{ watch: [path] },
 	);
 
+	// Carrega posts relacionados, se definidos no frontmatter (relatedPosts)
+	const { data: related } = await useAsyncData(
+		() => `post:related:${locale.value}:${doc.value?.path || "none"}`,
+		async () => {
+			if (!doc.value?.relatedPosts?.length) return [] as any[];
+			const localeLower = locale.value.toLowerCase();
+			const slugs = (doc.value.relatedPosts as string[]) || [];
+			const items = await Promise.all(
+				slugs.map(async (s) =>
+					queryCollection("posts")
+						.where("path", "=", `/posts/${localeLower}/${s}`)
+						.first(),
+				),
+			);
+			return items.filter(Boolean).filter((p: any) => !p.draft);
+		},
+		{ watch: [doc, locale] },
+	);
+
+	function toRelatedBlogPath(p: any) {
+		const raw = p?.seo?.slug || (p?.path as string)?.replace(/^\/posts\/[^/]+\//, "");
+		return localePath(`/blog/${raw}`);
+	}
+
 	watchEffect(() => {
 		// Aguarda a busca terminar antes de decidir 404
 		if (pending.value) return;
@@ -60,25 +84,49 @@
 				requestURL.origin,
 			).toString();
 
-		// JSON-LD Article básico com URL canônica do locale
-		useHead({
-			link: [{ rel: "canonical", href: canonical }],
-			script: [
-				{
-					type: "application/ld+json",
-					innerHTML: JSON.stringify({
-						"@context": "https://schema.org",
-						"@type": "Article",
-						"headline": doc.value.title,
-						"datePublished": doc.value.date,
-						"mainEntityOfPage": {
-							"@type": "WebPage",
-							"@id": canonical,
-						},
-					}),
-				},
-			],
+		// JSON-LD Article + BreadcrumbList com URL canônica do locale
+		const scripts = [] as any[];
+		scripts.push({
+			type: "application/ld+json",
+			innerHTML: JSON.stringify({
+				"@context": "https://schema.org",
+				"@type": "Article",
+				headline: doc.value.title,
+				datePublished: doc.value.date,
+				image: doc.value.cover?.image,
+				author: doc.value.author
+					? {
+						"@type": "Person",
+						name: doc.value.author.name,
+						sameAs: [
+							doc.value.author.social?.twitter,
+							doc.value.author.social?.github,
+							doc.value.author.social?.linkedin,
+							doc.value.author.social?.website,
+						].filter(Boolean),
+					}
+					: undefined,
+				mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
+			}),
 		});
+
+		const homeUrl = new URL(localePath("/"), requestURL.origin).toString();
+		const blogUrl = new URL(localePath("/blog"), requestURL.origin).toString();
+		const thisUrl = canonical;
+		scripts.push({
+			type: "application/ld+json",
+			innerHTML: JSON.stringify({
+				"@context": "https://schema.org",
+				"@type": "BreadcrumbList",
+				itemListElement: [
+					{ "@type": "ListItem", position: 1, name: t("site.home"), item: homeUrl },
+					{ "@type": "ListItem", position: 2, name: t("site.blog"), item: blogUrl },
+					{ "@type": "ListItem", position: 3, name: doc.value.title, item: thisUrl },
+				],
+			}),
+		});
+
+		useHead({ link: [{ rel: "canonical", href: canonical }], script: scripts });
 	});
 
 	// Evita exibir conteúdo de rascunho diretamente pela rota
@@ -158,16 +206,23 @@
 					#{{ tag }}
 				</span>
 			</div>
-			<div
-				v-if="doc.categories?.length"
-				class="text-sm text-gray-600">
-				<strong>Categories:</strong> {{ doc.categories.join(", ") }}
+			<div v-if="doc.categories?.length" class="text-sm text-gray-600">
+				<strong>{{ $t('post.categories') }}:</strong> {{ doc.categories.join(", ") }}
 			</div>
-			<div
-				v-if="doc.series"
-				class="text-sm text-gray-600">
-				<strong>Series:</strong> {{ doc.series }}
+			<div v-if="doc.series" class="text-sm text-gray-600">
+				<strong>{{ $t('post.series') }}:</strong> {{ doc.series }}
 				<span v-if="doc.seriesOrder"> · #{{ doc.seriesOrder }}</span>
+			</div>
+
+			<div v-if="related?.length" class="mt-6">
+				<h2 class="mb-3 text-lg font-semibold">{{ $t('post.related') }}</h2>
+				<ul class="space-y-2">
+					<li v-for="p in related" :key="p.path">
+						<NuxtLink :to="toRelatedBlogPath(p)" class="hover:underline">
+							{{ p.title || p.path.split('/').pop() }}
+						</NuxtLink>
+					</li>
+				</ul>
 			</div>
 		</footer>
 	</article>
