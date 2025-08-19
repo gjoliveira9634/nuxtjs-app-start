@@ -21,7 +21,9 @@
 		() => `post:${path.value}`,
 		async () => {
 			// 1) Tenta buscar por path exato
-			const exact = await queryCollection("posts").where("path", "=", path.value).first();
+			const exact = await queryCollection("posts")
+				.where("path", "=", path.value)
+				.first();
 			if (exact) return exact;
 			// 2) Se não encontrou, tenta por seo.slug (rota amigável)
 			const slug = (route.params.slug as string[]).join("/");
@@ -241,14 +243,18 @@
 				<span v-if="doc.seriesOrder"> · #{{ doc.seriesOrder }}</span>
 			</div>
 
-			<div v-if="related?.length" class="mt-8">
-				<h2 class="mb-4 text-lg font-semibold">{{ $t('post.related') }}</h2>
+			<div
+				v-if="related?.length"
+				class="mt-8">
+				<h2 class="mb-4 text-lg font-semibold">{{ $t("post.related") }}</h2>
 				<div class="grid gap-6 sm:grid-cols-2">
 					<article
 						v-for="p in related"
 						:key="p.path"
 						class="overflow-hidden rounded-lg border bg-white dark:border-gray-800 dark:bg-gray-900">
-						<NuxtLink :to="toRelatedBlogPath(p)" class="block">
+						<NuxtLink
+							:to="toRelatedBlogPath(p)"
+							class="block">
 							<div class="aspect-[16/9] w-full bg-gray-100 dark:bg-gray-800">
 								<img
 									v-if="p.cover?.image"
@@ -258,10 +264,10 @@
 							</div>
 							<div class="p-4">
 								<h3 class="line-clamp-2 text-base font-semibold">
-									{{ p.title || p.path.split('/').pop() }}
+									{{ p.title || p.path.split("/").pop() }}
 								</h3>
 								<p class="mt-1 text-xs text-gray-500">
-									{{ p.date ? formatDate(p.date) : '' }}
+									{{ p.date ? formatDate(p.date) : "" }}
 								</p>
 								<p
 									v-if="p.excerpt || p.description"

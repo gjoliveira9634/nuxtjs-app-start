@@ -75,7 +75,9 @@
 				v-for="post in posts"
 				:key="post.path"
 				class="overflow-hidden rounded-lg border bg-white dark:border-gray-800 dark:bg-gray-900">
-				<NuxtLink :to="toBlogPathFromDoc(post)" class="block">
+				<NuxtLink
+					:to="toBlogPathFromDoc(post)"
+					class="block">
 					<div class="aspect-[16/9] w-full bg-gray-100 dark:bg-gray-800">
 						<img
 							v-if="post.cover?.image"
@@ -85,10 +87,10 @@
 					</div>
 					<div class="p-4">
 						<h2 class="line-clamp-2 text-lg font-semibold">
-							{{ post.title || post.path.split('/').pop() }}
+							{{ post.title || post.path.split("/").pop() }}
 						</h2>
 						<p class="mt-1 text-xs text-gray-500">
-							{{ post.date ? formatDate(post.date) : '' }}
+							{{ post.date ? formatDate(post.date) : "" }}
 						</p>
 						<p
 							v-if="post.excerpt || post.description"
