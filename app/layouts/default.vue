@@ -1,12 +1,16 @@
 <script setup lang="ts">
 	const year = new Date().getFullYear();
 	const { t, locale, locales } = useI18n();
+	const route = useRoute();
 	// Códigos de idioma agora são genéricos (en, es, fr, pt)
 	type LocaleCode = string;
 	const switchLocalePath = useSwitchLocalePath() as unknown as (
 		code: string,
 	) => string;
-	const localePath = useLocalePath();
+	const localePath = useLocalePath() as unknown as (
+		path: string,
+		code?: string,
+	) => string;
 	// SEO multilíngue: adiciona html lang/dir, alternates e metatags do i18n
 	const i18nHead = useLocaleHead({
 		addDirAttribute: true,
@@ -30,6 +34,60 @@
 
 	async function switchLocale(code: LocaleCode) {
 		if (code === locale.value) return;
+
+		// Se estiver em uma página de post do blog, tenta navegar para o slug equivalente no idioma alvo
+		const isBlogPost = (route.name?.toString() || "").startsWith("blog-slug");
+		if (isBlogPost) {
+			try {
+				const currentSlug =
+					Array.isArray(route.params.slug) ?
+						(route.params.slug as string[]).join("/")
+					:	(route.params.slug as string) || "";
+				const curLocale = locale.value.toLowerCase();
+				const targetLocale = code.toLowerCase();
+
+				// 1) Descobre o documento atual para obter o nome base do arquivo
+				const currentCandidates = await queryCollection("posts")
+					.where("path", "LIKE", `/posts/${curLocale}/%`)
+					.all();
+				const currentDoc =
+					currentCandidates.find((p: any) => p?.seo?.slug === currentSlug)
+					|| currentCandidates.find(
+						(p: any) => p?.path === `/posts/${curLocale}/${currentSlug}`,
+					);
+				const baseName =
+					(currentDoc?.path as string | undefined)?.replace(
+						/^\/posts\/[^/]+\//,
+						"",
+					) || currentSlug;
+
+				// 2) Busca no idioma alvo por arquivo com mesmo nome base
+				const targetCandidates = await queryCollection("posts")
+					.where("path", "LIKE", `/posts/${targetLocale}/%`)
+					.all();
+				const targetDoc = targetCandidates.find((p: any) =>
+					(p?.path as string)?.endsWith(`/${baseName}`),
+				);
+				// Prefixo correto para o locale alvo baseado na estratégia do i18n
+				const baseForLocale = switchLocalePath(code) || "/";
+				const prefix = baseForLocale.split("/blog/")[0]; // "" ou "/es"
+
+				if (!targetDoc) {
+					// Se não houver equivalente, ir para a lista do blog no idioma alvo
+					const listPath = `${prefix}/blog`;
+					await navigateTo(listPath);
+					return;
+				}
+
+				const targetSlug = targetDoc?.seo?.slug || baseName;
+				const targetPath = `${prefix}/blog/${targetSlug}`;
+				await navigateTo(targetPath);
+				return;
+			} catch {
+				// Fallback para comportamento padrão caso algo falhe
+			}
+		}
+
 		await navigateTo(switchLocalePath(code));
 	}
 </script>

@@ -173,7 +173,7 @@ export default defineContentConfig({
 					.string()
 					.min(2)
 					.max(10)
-					.default("pt")
+					.default("en")
 					.describe("Locale do post (ex.: en, pt)"),
 
 				// 🔧 Técnico e Funcionalidades

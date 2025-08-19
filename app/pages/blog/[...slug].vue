@@ -26,11 +26,14 @@
 				.first();
 			if (exact) return exact;
 			// 2) Se não encontrou, tenta por seo.slug (rota amigável)
+			// Observação: evitar usar campo aninhado no WHERE do SQLite.
+			// Em vez disso, restringe pelo locale via path e filtra em JS pelo seo.slug.
 			const slug = (route.params.slug as string[]).join("/");
-			const bySlug = await queryCollection("posts")
-				.where("seo.slug", "=", slug)
-				.where("path", "LIKE", `/posts/${locale.value.toLowerCase()}/%`)
-				.first();
+			const localeLower = locale.value.toLowerCase();
+			const candidates = await queryCollection("posts")
+				.where("path", "LIKE", `/posts/${localeLower}/%`)
+				.all();
+			const bySlug = candidates.find((p: any) => p?.seo?.slug === slug);
 			return bySlug || null;
 		},
 		{ watch: [path] },
