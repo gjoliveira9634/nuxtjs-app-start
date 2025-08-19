@@ -1,6 +1,6 @@
 {
 	"scripts": {
-		"npm:setup": "npm install && npm audit fix && npm run nuxt:prepare",
+		"npm:setup": "npm install && npm run nuxt:prepare",
 		"nuxt:dev": "nuxt dev",
 		"nuxt:build": "nuxt build",
 		"nuxt:preview": "nuxt preview",
