@@ -12,7 +12,12 @@
 		"title": "Construisez vite avec Nuxt"
 	},
 	"errors": {
-		"postNotFound": "Article introuvable"
+		"postNotFound": "Article introuvable",
+		"pageNotFound": "Page introuvable",
+		"internalServerError": "Erreur interne du serveur",
+		"unexpected": "Une erreur inattendue s'est produite",
+		"goHome": "Retour à l'accueil",
+		"error": "Erreur"
 	},
 	"post": {
 		"categories": "Catégories",

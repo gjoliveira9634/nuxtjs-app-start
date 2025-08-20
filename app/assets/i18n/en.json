@@ -12,7 +12,12 @@
 		"title": "Build fast with Nuxt"
 	},
 	"errors": {
-		"postNotFound": "Post not found"
+		"postNotFound": "Post not found",
+		"pageNotFound": "Page not found",
+		"internalServerError": "Internal server error",
+		"unexpected": "An unexpected error occurred",
+		"goHome": "Go back home",
+		"error": "Error"
 	},
 	"post": {
 		"categories": "Categories",
