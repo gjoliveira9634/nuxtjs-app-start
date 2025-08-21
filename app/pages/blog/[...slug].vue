@@ -248,7 +248,13 @@
 					:alt="doc.author.name"
 					class="h-10 w-10 rounded-full object-cover" />
 				<div>
-					<p class="text-sm font-medium">{{ doc.author.name }}</p>
+					<NuxtLink
+						:to="
+							localePath(`/blog/authors/${encodeURIComponent(doc.author.name)}`)
+						"
+						class="text-sm font-medium underline-offset-2 hover:underline"
+						>{{ doc.author.name }}</NuxtLink
+					>
 					<p
 						v-if="doc.author.bio"
 						class="text-xs text-gray-500">
@@ -290,7 +296,12 @@
 			<div
 				v-if="doc.series"
 				class="text-sm text-gray-600">
-				<strong>{{ $t("post.series") }}:</strong> {{ doc.series }}
+				<strong>{{ $t("post.series") }}:</strong>
+				<NuxtLink
+					:to="localePath(`/blog/series/${encodeURIComponent(doc.series)}`)"
+					class="underline-offset-2 hover:underline"
+					>{{ doc.series }}</NuxtLink
+				>
 				<span v-if="doc.seriesOrder"> · #{{ doc.seriesOrder }}</span>
 			</div>
 

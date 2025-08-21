@@ -45,10 +45,11 @@
 	const { data: categories } = await useAsyncData(
 		() => `blog:categories:${locale.value}`,
 		async () => {
-			const list = await queryCollection("categories")
-				.where("path", "LIKE", `/categories/${locale.value.toLowerCase()}/%`)
-				.all();
-			return list;
+			const list = await queryCollection("categories").all();
+			const loc = locale.value.toLowerCase();
+			return (list as any[]).filter((c: any) =>
+				(c?.path || "").startsWith(`/categories/${loc}/`),
+			);
 		},
 		{ watch: [locale] },
 	);
@@ -176,6 +177,16 @@
 				</div>
 
 				<div class="ml-3">
+					<NuxtLink
+						:to="localePath('/blog/authors')"
+						class="underline-offset-2 hover:underline"
+						>{{ t("post.author") || "Autores" }}</NuxtLink
+					>
+					<NuxtLink
+						:to="localePath('/blog/series')"
+						class="underline-offset-2 hover:underline"
+						>{{ t("post.series") }}</NuxtLink
+					>
 					<select
 						:value="locale"
 						class="rounded border bg-transparent px-2 py-1 text-sm dark:border-gray-700"
@@ -197,6 +208,18 @@
 					<slot />
 				</div>
 				<aside class="md:sticky md:top-16">
+					<div class="mb-4 flex gap-3 text-sm">
+						<NuxtLink
+							:to="localePath('/blog/authors')"
+							class="underline-offset-2 hover:underline"
+							>{{ t("post.author") || "Autores" }}</NuxtLink
+						>
+						<NuxtLink
+							:to="localePath('/blog/series')"
+							class="underline-offset-2 hover:underline"
+							>{{ t("post.series") }}</NuxtLink
+						>
+					</div>
 					<div
 						class="mb-4 flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
 						<span v-if="q">{{ t("blog.search") }}: "{{ q }}"</span>

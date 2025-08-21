@@ -22,7 +22,8 @@
 	"post": {
 		"categories": "Categories",
 		"series": "Series",
-		"related": "Related posts"
+		"related": "Related posts",
+		"author": "Authors"
 	},
 	"blog": {
 		"search": "Search",
