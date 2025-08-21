@@ -21,21 +21,26 @@
 	} = await useAsyncData(
 		() => `post:${path.value}`,
 		async () => {
-			// 1) Tenta buscar por path exato
-			const exact = await queryCollection("posts")
-				.where("path", "=", path.value)
-				.first();
-			if (exact) return exact;
-			// 2) Se não encontrou, tenta por seo.slug (rota amigável)
-			// Observação: evitar usar campo aninhado no WHERE do SQLite.
-			// Em vez disso, restringe pelo locale via path e filtra em JS pelo seo.slug.
+			// Estratégia robusta: carrega todos os posts e filtra por locale + path/slug em memória
 			const slug = (route.params.slug as string[]).join("/");
 			const localeLower = locale.value.toLowerCase();
-			const candidates = await queryCollection("posts")
-				.where("path", "LIKE", `/posts/${localeLower}/%`)
-				.all();
+			const base = `/posts/${localeLower}/`;
+			const posts = await queryCollection("posts").all();
+			// Restringe àquele locale
+			const candidates = posts.filter((p: any) =>
+				(p?.path as string)?.startsWith(base),
+			);
+			// 1) Match por path exato (não tem extensão no path)
+			const byPath = candidates.find((p: any) => p.path === `${base}${slug}`);
+			if (byPath) return byPath;
+			// 2) Match por seo.slug (fallback)
 			const bySlug = candidates.find((p: any) => p?.seo?.slug === slug);
-			return bySlug || null;
+			if (bySlug) return bySlug;
+			// 3) Último recurso: nome do arquivo (parte final do path)
+			const byFile = candidates.find(
+				(p: any) => (p.path as string).split("/").pop() === slug,
+			);
+			return byFile || null;
 		},
 		{ watch: [path] },
 	);
@@ -46,15 +51,20 @@
 		async () => {
 			if (!doc.value?.relatedPosts?.length) return [] as any[];
 			const localeLower = locale.value.toLowerCase();
+			const base = `/posts/${localeLower}/`;
 			const slugs = (doc.value.relatedPosts as string[]) || [];
-			const items = await Promise.all(
-				slugs.map(async (s) =>
-					queryCollection("posts")
-						.where("path", "=", `/posts/${localeLower}/${s}`)
-						.first(),
-				),
+			const posts = await queryCollection("posts").all();
+			const candidates = posts.filter((p: any) =>
+				(p?.path as string)?.startsWith(base),
 			);
-			return items.filter(Boolean).filter((p: any) => !p.draft);
+			const items = slugs
+				.map(
+					(s) =>
+						candidates.find((p: any) => p.path === `${base}${s}`)
+						|| candidates.find((p: any) => p?.seo?.slug === s),
+				)
+				.filter(Boolean) as any[];
+			return items.filter((p: any) => !p.draft);
 		},
 		{ watch: [doc, locale] },
 	);
@@ -62,7 +72,7 @@
 	function toRelatedBlogPath(p: any) {
 		const raw =
 			p?.seo?.slug || (p?.path as string)?.replace(/^\/posts\/[^/]+\//, "");
-		return localePath(`/blog/${raw}`);
+		return localePath(`/blog/posts/${raw}`);
 	}
 
 	watchEffect(() => {
@@ -91,7 +101,7 @@
 			doc.value.seo?.canonical
 			|| new URL(
 				localePath(
-					(doc.value.path as string).replace(/^\/posts\/[^/]+/, "/blog"),
+					(doc.value.path as string).replace(/^\/posts\/[^/]+/, "/blog/posts"),
 				),
 				requestURL.origin,
 			).toString();
@@ -198,14 +208,18 @@
 	const { data: neighbors } = await useAsyncData(
 		() => `post:neighbors:${locale.value}:${path.value}`,
 		async () => {
-			const list = await queryCollection("posts")
-				.where("path", "LIKE", `/posts/${locale.value.toLowerCase()}/%`)
-				.order("date", "DESC")
-				.all();
+			const localeLower = locale.value.toLowerCase();
+			const base = `/posts/${localeLower}/`;
+			const posts = await queryCollection("posts").all();
+			const list = posts
+				.filter((p: any) => (p?.path as string)?.startsWith(base) && !p.draft)
+				.sort(
+					(a: any, b: any) =>
+						new Date(b.date).getTime() - new Date(a.date).getTime(),
+				);
+			const currentSlug = (route.params.slug as string[]).join("/");
 			const idx = list.findIndex(
-				(p: any) =>
-					p.path === path.value
-					|| p?.seo?.slug === (route.params.slug as string[]).join("/"),
+				(p: any) => p.path === path.value || p?.seo?.slug === currentSlug,
 			);
 			return {
 				prev: idx > 0 ? list[idx - 1] : null,

@@ -2,6 +2,7 @@
 	const year = new Date().getFullYear();
 	const { t, locale, locales } = useI18n();
 	const route = useRoute();
+	const router = useRouter();
 	// Códigos de idioma agora são genéricos (en, es, fr, pt)
 	type LocaleCode = string;
 	const switchLocalePath = useSwitchLocalePath() as unknown as (
@@ -36,7 +37,9 @@
 		if (code === locale.value) return;
 
 		// Se estiver em uma página de post do blog, tenta navegar para o slug equivalente no idioma alvo
-		const isBlogPost = (route.name?.toString() || "").startsWith("blog-slug");
+		const isBlogPost = (route.name?.toString() || "").startsWith(
+			"blog-posts-slug",
+		);
 		if (isBlogPost) {
 			try {
 				const currentSlug =
@@ -48,25 +51,28 @@
 
 				// 1) Descobre o documento atual para obter o nome base do arquivo
 				const currentCandidates = await queryCollection("posts")
-					.where("path", "LIKE", `/posts/${curLocale}/%`)
+					.where("id", "LIKE", `posts/${curLocale}/%`)
 					.all();
 				const currentDoc =
 					currentCandidates.find((p: any) => p?.seo?.slug === currentSlug)
 					|| currentCandidates.find(
-						(p: any) => p?.path === `/posts/${curLocale}/${currentSlug}`,
+						(p: any) =>
+							(p?.id as string)?.replace(/\.md$/, "")
+							=== `posts/${curLocale}/${currentSlug}`,
 					);
 				const baseName =
-					(currentDoc?.path as string | undefined)?.replace(
-						/^\/posts\/[^/]+\//,
-						"",
-					) || currentSlug;
+					((currentDoc?.id as string) || (currentDoc?.path as string) || "")
+						.replace(/^\/?posts\/[^/]+\//, "")
+						.replace(/(\/index)?\.md$/, "") || currentSlug;
 
 				// 2) Busca no idioma alvo por arquivo com mesmo nome base
 				const targetCandidates = await queryCollection("posts")
-					.where("path", "LIKE", `/posts/${targetLocale}/%`)
+					.where("id", "LIKE", `posts/${targetLocale}/%`)
 					.all();
 				const targetDoc = targetCandidates.find((p: any) =>
-					(p?.path as string)?.endsWith(`/${baseName}`),
+					((p?.id as string) || (p?.path as string) || "")
+						.replace(/(\/index)?\.md$/, "")
+						.endsWith(`/${baseName}`),
 				);
 				// Prefixo correto para o locale alvo baseado na estratégia do i18n
 				const baseForLocale = switchLocalePath(code) || "/";
@@ -75,20 +81,21 @@
 				if (!targetDoc) {
 					// Se não houver equivalente, ir para a lista do blog no idioma alvo
 					const listPath = `${prefix}/blog`;
-					await navigateTo(listPath);
+					await router.replace(listPath);
 					return;
 				}
 
 				const targetSlug = targetDoc?.seo?.slug || baseName;
-				const targetPath = `${prefix}/blog/${targetSlug}`;
-				await navigateTo(targetPath);
+				const targetPath = `${prefix}/blog/posts/${targetSlug}`;
+				await router.replace(targetPath);
 				return;
 			} catch {
 				// Fallback para comportamento padrão caso algo falhe
 			}
 		}
 
-		await navigateTo(switchLocalePath(code));
+		// Navegação suave mantendo SPA
+		await router.replace(switchLocalePath(code));
 	}
 </script>
 

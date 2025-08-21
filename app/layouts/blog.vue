@@ -45,11 +45,19 @@
 	const { data: categories } = await useAsyncData(
 		() => `blog:categories:${locale.value}`,
 		async () => {
-			const list = await queryCollection("categories").all();
 			const loc = locale.value.toLowerCase();
-			return (list as any[]).filter((c: any) =>
-				(c?.path || "").startsWith(`/categories/${loc}/`),
-			);
+			const list = await queryCollection("categories")
+				.where("id", "LIKE", `categories/${loc}/%`)
+				.all();
+			return (list as any[]).map((c: any) => {
+				const base = (c.id as string) || (c.path as string) || "";
+				return {
+					...c,
+					slug: base
+						.replace(/^\/?categories\/[^/]+\//, "")
+						.replace(/\.[^/.]+$/, ""),
+				};
+			});
 		},
 		{ watch: [locale] },
 	);
@@ -58,11 +66,13 @@
 	const { data: tagCloud } = await useAsyncData(
 		() => `blog:tagCloud:${locale.value}`,
 		async () => {
-			const posts = await queryCollection("posts")
-				.where("path", "LIKE", `/posts/${locale.value.toLowerCase()}/%`)
-				.all();
+			const posts = await queryCollection("posts").all();
+			const base = `/posts/${locale.value.toLowerCase()}/`;
+			const scoped = posts.filter(
+				(p: any) => ((p.path as string) || "").startsWith(base) && !p.draft,
+			);
 			const freq = new Map<string, number>();
-			for (const p of posts.filter((p: any) => !p.draft)) {
+			for (const p of scoped) {
 				for (const tag of (p.tags as string[]) || []) {
 					freq.set(tag, (freq.get(tag) || 0) + 1);
 				}
@@ -94,7 +104,9 @@
 	async function switchLocale(code: string) {
 		if (code === locale.value) return;
 
-		const isBlogPost = (route.name?.toString() || "").startsWith("blog-slug");
+		const isBlogPost = (route.name?.toString() || "").startsWith(
+			"blog-posts-slug",
+		);
 		if (isBlogPost) {
 			try {
 				const currentSlug =
@@ -104,45 +116,54 @@
 				const curLocale = locale.value.toLowerCase();
 				const targetLocale = code.toLowerCase();
 
-				// Find current doc to get basename
-				const currentCandidates = await queryCollection("posts")
-					.where("path", "LIKE", `/posts/${curLocale}/%`)
-					.all();
+				// Find current doc to get basename (fetch all, filter in JS to avoid connector differences)
+				const allCurrent = await queryCollection("posts").all();
+				const currentBase = `posts/${curLocale}/`;
+				const currentCandidates = allCurrent.filter((p: any) =>
+					((p.id as string) || (p.path as string) || "").startsWith(
+						currentBase,
+					),
+				);
 				const currentDoc =
 					currentCandidates.find((p: any) => p?.seo?.slug === currentSlug)
 					|| currentCandidates.find(
-						(p: any) => p?.path === `/posts/${curLocale}/${currentSlug}`,
+						(p: any) =>
+							(p?.id as string)?.replace(/\.md$/, "")
+							=== `posts/${curLocale}/${currentSlug}`,
 					);
 				const baseName =
-					(currentDoc?.path as string | undefined)?.replace(
-						/^\/posts\/[^/]+\//,
-						"",
-					) || currentSlug;
+					((currentDoc?.id as string) || (currentDoc?.path as string) || "")
+						.replace(/^\/?posts\/[^/]+\//, "")
+						.replace(/(\/index)?\.md$/, "") || currentSlug;
 
 				// Find target doc with same basename
-				const targetCandidates = await queryCollection("posts")
-					.where("path", "LIKE", `/posts/${targetLocale}/%`)
-					.all();
+				const allTarget = await queryCollection("posts").all();
+				const targetBase = `posts/${targetLocale}/`;
+				const targetCandidates = allTarget.filter((p: any) =>
+					((p.id as string) || (p.path as string) || "").startsWith(targetBase),
+				);
 				const targetDoc = targetCandidates.find((p: any) =>
-					(p?.path as string)?.endsWith(`/${baseName}`),
+					((p?.id as string) || (p?.path as string) || "")
+						.replace(/(\/index)?\.md$/, "")
+						.endsWith(`/${baseName}`),
 				);
 
 				const baseForLocale = switchLocalePath(code) || "/";
 				const prefix = baseForLocale.split("/blog/")[0]; // e.g. '', '/es'
 
 				if (!targetDoc) {
-					await navigateTo(`${prefix}/blog`);
+					await router.replace(`${prefix}/blog`);
 					return;
 				}
 				const targetSlug = targetDoc?.seo?.slug || baseName;
-				await navigateTo(`${prefix}/blog/${targetSlug}`);
+				await router.replace(`${prefix}/blog/posts/${targetSlug}`);
 				return;
 			} catch (e) {
 				// fallback
 			}
 		}
 
-		await navigateTo(switchLocalePath(code));
+		await router.replace(switchLocalePath(code));
 	}
 </script>
 
@@ -187,6 +208,17 @@
 						class="underline-offset-2 hover:underline"
 						>{{ t("post.series") }}</NuxtLink
 					>
+					<NuxtLink
+						:to="localePath('/blog/categories')"
+						class="underline-offset-2 hover:underline"
+						>{{ t("blog.categories") }}</NuxtLink
+					>
+
+					<NuxtLink
+						:to="localePath('/blog/posts')"
+						class="underline-offset-2 hover:underline"
+						>Posts</NuxtLink
+					>
 					<select
 						:value="locale"
 						class="rounded border bg-transparent px-2 py-1 text-sm dark:border-gray-700"
@@ -218,6 +250,16 @@
 							:to="localePath('/blog/series')"
 							class="underline-offset-2 hover:underline"
 							>{{ t("post.series") }}</NuxtLink
+						>
+						<NuxtLink
+							:to="localePath('/blog/categories')"
+							class="underline-offset-2 hover:underline"
+							>{{ t("blog.categories") }}</NuxtLink
+						>
+						<NuxtLink
+							:to="localePath('/blog/posts')"
+							class="underline-offset-2 hover:underline"
+							>Posts</NuxtLink
 						>
 					</div>
 					<div
@@ -251,10 +293,10 @@
 							>
 							<button
 								v-for="c in categories || []"
-								:key="c.name"
+								:key="c.slug || c.name"
 								class="rounded px-2 py-1 text-xs text-white"
 								:style="{ backgroundColor: c.color || '#6b7280' }"
-								@click="updateQuery({ cat: c.name })"
+								@click="updateQuery({ cat: c.slug || c.name })"
 								>{{ c.name }}</button
 							>
 						</div>

@@ -36,11 +36,16 @@
 		() => `posts:list:${locale.value}`,
 		async () => {
 			try {
-				const all = await queryCollection("posts")
-					.where("path", "LIKE", `/posts/${locale.value.toLowerCase()}/%`)
-					.order("date", "DESC")
-					.all();
-				return all.filter((p: any) => !p.draft);
+				const all = await queryCollection("posts").all();
+				const base = `/posts/${locale.value.toLowerCase()}/`;
+				return all
+					.filter(
+						(p: any) => !p.draft && ((p.path as string) || "").startsWith(base),
+					)
+					.sort(
+						(a: any, b: any) =>
+							new Date(b.date).getTime() - new Date(a.date).getTime(),
+					);
 			} catch (error) {
 				console.error("Erro ao buscar posts:", error);
 				return [];
@@ -62,7 +67,13 @@
 			);
 		}
 		if (cat.value) {
-			arr = arr.filter((p) => (p.categories || []).includes(cat.value));
+			const c = cat.value;
+			arr = arr.filter((p) => {
+				const cats = (p.categories || []) as string[];
+				// Suporte a slug e nome: se categoria do post vier como nome, normaliza para kabab-case
+				const asSlug = cats.map((x) => x.toLowerCase().replace(/\s+/g, "-"));
+				return cats.includes(c) || asSlug.includes(c.toLowerCase());
+			});
 		}
 		if (tag.value) {
 			arr = arr.filter((p) => (p.tags || []).includes(tag.value));
@@ -81,10 +92,10 @@
 		return p.replace(/^\/posts\/[^/]+/, "/blog");
 	}
 
-	function toBlogPathFromDoc(p: any) {
+	function toBlogPostPathFromDoc(p: any) {
 		const raw =
 			p?.seo?.slug || (p?.path as string)?.replace(/^\/posts\/[^/]+\//, "");
-		return localePath(`/blog/${raw}`);
+		return localePath(`/blog/posts/${raw}`);
 	}
 
 	function formatDate(d: string | number | Date) {
@@ -119,7 +130,7 @@
 				:key="post.path"
 				class="overflow-hidden rounded-lg border bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
 				<NuxtLink
-					:to="toBlogPathFromDoc(post)"
+					:to="toBlogPostPathFromDoc(post)"
 					class="block">
 					<div class="aspect-[16/9] w-full bg-gray-100 dark:bg-gray-800">
 						<img
@@ -163,7 +174,7 @@
 				:key="post.path"
 				class="overflow-hidden rounded-lg border bg-white dark:border-gray-800 dark:bg-gray-900">
 				<NuxtLink
-					:to="toBlogPathFromDoc(post)"
+					:to="toBlogPostPathFromDoc(post)"
 					class="block">
 					<div class="aspect-[16/9] w-full bg-gray-100 dark:bg-gray-800">
 						<img
