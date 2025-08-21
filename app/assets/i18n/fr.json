@@ -23,5 +23,18 @@
 		"categories": "Catégories",
 		"series": "Série",
 		"related": "Articles associés"
+	},
+	"blog": {
+		"search": "Recherche",
+		"searchPlaceholder": "Rechercher des articles…",
+		"categories": "Catégories",
+		"allCategories": "Toutes",
+		"tags": "Tags",
+		"allTags": "Tous",
+		"tag": "Tag",
+		"category": "Catégorie",
+		"clearFilters": "Effacer les filtres",
+		"occurrences": "occurrences",
+		"noResults": "Aucun résultat. Essayez d'ajuster les filtres."
 	}
 }

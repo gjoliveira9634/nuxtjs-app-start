@@ -1,4 +1,5 @@
 <script setup lang="ts">
+	definePageMeta({ layout: "blog" });
 	const route = useRoute();
 	const { t, locale } = useI18n();
 	const localePath = useLocalePath();
@@ -176,6 +177,43 @@
 			return new Date(d).toLocaleDateString();
 		}
 	}
+
+	// Visual helpers
+	function tagColor(tag: string) {
+		let hash = 0;
+		for (let i = 0; i < tag.length; i++)
+			hash = (hash << 5) - hash + tag.charCodeAt(i);
+		const hue = Math.abs(hash) % 360;
+		return `hsl(${hue} 70% 45%)`;
+	}
+
+	function toTagLink(tag: string) {
+		return `${localePath("/blog")}?tag=${encodeURIComponent(tag)}`;
+	}
+	function toCatLink(cat: string) {
+		return `${localePath("/blog")}?cat=${encodeURIComponent(cat)}`;
+	}
+
+	// Prev/Next within locale
+	const { data: neighbors } = await useAsyncData(
+		() => `post:neighbors:${locale.value}:${path.value}`,
+		async () => {
+			const list = await queryCollection("posts")
+				.where("path", "LIKE", `/posts/${locale.value.toLowerCase()}/%`)
+				.order("date", "DESC")
+				.all();
+			const idx = list.findIndex(
+				(p: any) =>
+					p.path === path.value
+					|| p?.seo?.slug === (route.params.slug as string[]).join("/"),
+			);
+			return {
+				prev: idx > 0 ? list[idx - 1] : null,
+				next: idx >= 0 && idx + 1 < list.length ? list[idx + 1] : null,
+			};
+		},
+		{ watch: [locale, path] },
+	);
 </script>
 
 <template>
@@ -226,18 +264,28 @@
 			<div
 				v-if="doc.tags?.length"
 				class="flex flex-wrap gap-2">
-				<span
+				<NuxtLink
 					v-for="tag in doc.tags"
 					:key="tag"
-					class="rounded bg-gray-100 px-2 py-1 text-xs dark:bg-gray-800">
+					class="rounded px-2 py-1 text-xs font-medium text-white"
+					:style="{ backgroundColor: tagColor(tag) }"
+					:to="toTagLink(tag)">
 					#{{ tag }}
-				</span>
+				</NuxtLink>
 			</div>
 			<div
 				v-if="doc.categories?.length"
 				class="text-sm text-gray-600">
 				<strong>{{ $t("post.categories") }}:</strong>
-				{{ doc.categories.join(", ") }}
+				<span class="inline-flex flex-wrap gap-2">
+					<NuxtLink
+						v-for="c in doc.categories"
+						:key="c"
+						:to="toCatLink(c)"
+						class="underline-offset-2 hover:underline"
+						>{{ c }}</NuxtLink
+					>
+				</span>
 			</div>
 			<div
 				v-if="doc.series"
@@ -281,6 +329,22 @@
 						</NuxtLink>
 					</article>
 				</div>
+			</div>
+
+			<!-- Prev / Next navigation -->
+			<div class="mt-8 flex gap-3">
+				<NuxtLink
+					v-if="neighbors?.prev"
+					:to="toRelatedBlogPath(neighbors.prev)"
+					class="rounded border px-3 py-2 text-sm hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800">
+					← {{ neighbors.prev.title || neighbors.prev.path.split("/").pop() }}
+				</NuxtLink>
+				<NuxtLink
+					v-if="neighbors?.next"
+					:to="toRelatedBlogPath(neighbors.next)"
+					class="ml-auto rounded border px-3 py-2 text-sm hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800">
+					{{ neighbors.next.title || neighbors.next.path.split("/").pop() }} →
+				</NuxtLink>
 			</div>
 		</footer>
 	</article>

@@ -23,5 +23,18 @@
 		"categories": "Categories",
 		"series": "Series",
 		"related": "Related posts"
+	},
+	"blog": {
+		"search": "Search",
+		"searchPlaceholder": "Search posts…",
+		"categories": "Categories",
+		"allCategories": "All",
+		"tags": "Tags",
+		"allTags": "All",
+		"tag": "Tag",
+		"category": "Category",
+		"clearFilters": "Clear filters",
+		"occurrences": "occurrences",
+		"noResults": "No results found. Try adjusting the filters."
 	}
 }
