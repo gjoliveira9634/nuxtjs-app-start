@@ -42,8 +42,8 @@
 	);
 
 	function toBlogPostPathFromDoc(p: any) {
-		const raw =
-			p?.seo?.slug || (p?.path as string)?.replace(/^\/posts\/[^/]+\//, "");
+		// Usa sempre o basename do arquivo (em inglês) como slug canônico
+		const raw = (p?.path as string)?.replace(/^\/posts\/[^/]+\//, "");
 		return localePath(`/blog/posts/${raw}`);
 	}
 </script>

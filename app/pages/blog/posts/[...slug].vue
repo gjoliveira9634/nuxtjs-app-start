@@ -1,9 +1,26 @@
 <script setup lang="ts">
 	definePageMeta({ layout: "blog" });
 	const route = useRoute();
+	const router = useRouter();
 	const { t, locale } = useI18n();
 	const localePath = useLocalePath();
 	const requestURL = useRequestURL();
+
+	// Flag para transições de rota/idioma a fim de evitar 404 durante trocas
+	const isNavigating = ref(false);
+	if (process.client) {
+		// Marca início da troca de rota
+		onBeforeRouteUpdate(() => {
+			isNavigating.value = true;
+		});
+		// Desmarca ao finalizar
+		const removeAfterEach = router.afterEach(() => {
+			isNavigating.value = false;
+		});
+		onUnmounted(() => {
+			removeAfterEach && removeAfterEach();
+		});
+	}
 
 	// Resolve o caminho do documento conforme o locale atual
 	const path = computed(() => {
@@ -70,19 +87,18 @@
 	);
 
 	function toRelatedBlogPath(p: any) {
-		const raw =
-			p?.seo?.slug || (p?.path as string)?.replace(/^\/posts\/[^/]+\//, "");
+		// Usa sempre o basename do arquivo (em inglês) como slug canônico
+		const raw = (p?.path as string)?.replace(/^\/posts\/[^/]+\//, "");
 		return localePath(`/blog/posts/${raw}`);
 	}
 
 	watchEffect(() => {
 		// Aguarda a busca terminar antes de decidir 404
-		if (pending.value) return;
+		if (pending.value || isNavigating.value) return;
 		if (!doc.value) {
-			throw createError({
-				statusCode: 404,
-				message: t("errors.postNotFound") as string,
-			});
+			// Redireciona de forma suave para a listagem no mesmo locale se não encontrar
+			navigateTo(localePath("/blog"), { replace: true });
+			return;
 		}
 
 		// SEO por post (executa somente se doc existir)
@@ -170,11 +186,10 @@
 	// Evita exibir conteúdo de rascunho diretamente pela rota
 	watchEffect(() => {
 		if (pending.value) return;
+		if (isNavigating.value) return;
 		if (doc.value && doc.value.draft) {
-			throw createError({
-				statusCode: 404,
-				message: t("errors.postNotFound") as string,
-			});
+			// Evita exibir rascunho: envia para listagem
+			navigateTo(localePath("/blog"), { replace: true });
 		}
 	});
 
@@ -219,7 +234,9 @@
 				);
 			const currentSlug = (route.params.slug as string[]).join("/");
 			const idx = list.findIndex(
-				(p: any) => p.path === path.value || p?.seo?.slug === currentSlug,
+				(p: any) =>
+					p.path === path.value
+					|| (p.path as string).endsWith(`/${currentSlug}`),
 			);
 			return {
 				prev: idx > 0 ? list[idx - 1] : null,

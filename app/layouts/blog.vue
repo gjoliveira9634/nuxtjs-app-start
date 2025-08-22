@@ -118,36 +118,30 @@
 
 				// Find current doc to get basename (fetch all, filter in JS to avoid connector differences)
 				const allCurrent = await queryCollection("posts").all();
-				const currentBase = `posts/${curLocale}/`;
+				const currentBase = `/posts/${curLocale}/`;
 				const currentCandidates = allCurrent.filter((p: any) =>
-					((p.id as string) || (p.path as string) || "").startsWith(
-						currentBase,
-					),
+					(p?.path as string)?.startsWith(currentBase),
 				);
 				const currentDoc =
 					currentCandidates.find((p: any) => p?.seo?.slug === currentSlug)
 					|| currentCandidates.find(
-						(p: any) =>
-							(p?.id as string)?.replace(/\.md$/, "")
-							=== `posts/${curLocale}/${currentSlug}`,
+						(p: any) => (p?.path as string) === `${currentBase}${currentSlug}`,
 					);
 				const baseName =
-					((currentDoc?.id as string) || (currentDoc?.path as string) || "")
-						.replace(/^\/?posts\/[^/]+\//, "")
-						.replace(/(\/index)?\.md$/, "") || currentSlug;
+					((currentDoc?.path as string) || "").replace(/^\/posts\/[^/]+\//, "")
+					|| currentSlug;
 
 				// Find target doc with same basename
 				const allTarget = await queryCollection("posts").all();
-				const targetBase = `posts/${targetLocale}/`;
+				const targetBase = `/posts/${targetLocale}/`;
 				const targetCandidates = allTarget.filter((p: any) =>
-					((p.id as string) || (p.path as string) || "").startsWith(targetBase),
+					(p?.path as string)?.startsWith(targetBase),
 				);
 				const targetDoc = targetCandidates.find((p: any) =>
-					((p?.id as string) || (p?.path as string) || "")
-						.replace(/(\/index)?\.md$/, "")
-						.endsWith(`/${baseName}`),
+					(p?.path as string)?.endsWith(`/${baseName}`),
 				);
 
+				// Compute locale prefix from switchLocalePath once (no navigation yet)
 				const baseForLocale = switchLocalePath(code) || "/";
 				const prefix = baseForLocale.split("/blog/")[0]; // e.g. '', '/es'
 
@@ -155,11 +149,16 @@
 					await router.replace(`${prefix}/blog`);
 					return;
 				}
-				const targetSlug = targetDoc?.seo?.slug || baseName;
+				// Usa sempre o basename em inglês do arquivo como slug canônico
+				const targetSlug = baseName;
 				await router.replace(`${prefix}/blog/posts/${targetSlug}`);
 				return;
 			} catch (e) {
-				// fallback
+				// If anything fails while on a post, prefer sending user to the blog home of the target locale
+				const baseForLocale = switchLocalePath(code) || "/";
+				const prefix = baseForLocale.split("/blog/")[0];
+				await router.replace(`${prefix}/blog`);
+				return;
 			}
 		}
 
