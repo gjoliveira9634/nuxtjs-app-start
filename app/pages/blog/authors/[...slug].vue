@@ -10,12 +10,20 @@
 		() => `author:${locale.value}:${slug.value}`,
 		async () => {
 			const loc = locale.value.toLowerCase();
-			const all = (await queryCollection("authors").all()) as any[];
-			const list = all.filter((a: any) =>
-				((a.id as string) || (a.path as string) || "")
-					.replace(/^\//, "")
-					.startsWith(`authors/${loc}/`),
-			);
+			let list = (await queryCollection("authors")
+				.where("id", "LIKE", `authors/${loc}/%`)
+				.all()) as any[];
+			if (!list?.length) {
+				const all = (await queryCollection("authors").all()) as any[];
+				list = all.filter((a: any) => {
+					const id = ((a?.id as string) || "").replace(/^\//, "");
+					const path = (a?.path as string) || "";
+					return (
+						id.startsWith(`authors/${loc}/`)
+						|| path.startsWith(`/authors/${loc}/`)
+					);
+				});
+			}
 			// Match by file slug (path) or by normalized name
 			const bySlug = (list as any[]).find((a: any) => {
 				const base = (a.id as string) || (a.path as string) || "";
@@ -63,8 +71,8 @@
 	);
 
 	function toBlogPostPathFromDoc(p: any) {
-		const raw =
-			p?.seo?.slug || (p?.path as string)?.replace(/^\/posts\/[^/]+\//, "");
+		// Usa sempre o basename do arquivo (em inglês) como slug canônico
+		const raw = (p?.path as string)?.replace(/^\/posts\/[^/]+\//, "");
 		return localePath(`/blog/posts/${raw}`);
 	}
 

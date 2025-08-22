@@ -28,34 +28,48 @@
 		() => `categories:${locale.value}`,
 		async () => {
 			const loc = locale.value.toLowerCase();
-			const all = (await queryCollection("categories").all()) as any[];
-			return all
-				.filter((c: any) => {
-					const p = (c?.id as string) || (c?.path as string) || "";
-					return p.replace(/^\//, "").startsWith(`categories/${loc}/`);
-				})
-				.map((c: any) => {
-					const base = (c.id as string) || (c.path as string) || "";
-					return {
-						...c,
-						slug: base
-							.replace(/^\/?categories\/[^/]+\//, "")
-							.replace(/\.[^/.]+$/, ""),
-					};
+			let list = (await queryCollection("categories")
+				.where("id", "LIKE", `categories/${loc}/%`)
+				.all()) as any[];
+			if (!list?.length) {
+				const all = (await queryCollection("categories").all()) as any[];
+				list = all.filter((c: any) => {
+					const id = ((c?.id as string) || "").replace(/^\//, "");
+					const path = (c?.path as string) || "";
+					return (
+						id.startsWith(`categories/${loc}/`)
+						|| path.startsWith(`/categories/${loc}/`)
+					);
 				});
+			}
+			if (!list.length) {
+				const all = (await queryCollection("categories").all()) as any[];
+				list = all;
+			}
+			return list.map((c: any) => {
+				const base = (c.id as string) || (c.path as string) || "";
+				return {
+					...c,
+					slug: base
+						.replace(/^\/?categories\/[^/]+\//, "")
+						.replace(/\.[^/.]+$/, ""),
+				};
+			});
 		},
 		{ watch: [locale] },
 	);
+
+	const categoriesList = computed(() => (categories.value as any[]) || []);
 </script>
 
 <template>
 	<div class="py-8">
 		<h1 class="mb-6 text-3xl font-semibold">{{ $t("blog.categories") }}</h1>
 		<div
-			v-if="(categories || []).length"
+			v-if="categoriesList.length"
 			class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			<BlogCategoryCard
-				v-for="c in categories || []"
+				v-for="c in categoriesList"
 				:key="c.slug || c.name"
 				:item="c"
 				:to="

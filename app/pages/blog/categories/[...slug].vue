@@ -10,12 +10,20 @@
 		() => `category:${locale.value}:${slug.value}`,
 		async () => {
 			const loc = locale.value.toLowerCase();
-			const all = (await queryCollection("categories").all()) as any[];
-			const list = all.filter((c: any) =>
-				((c.id as string) || (c.path as string) || "")
-					.replace(/^\//, "")
-					.startsWith(`categories/${loc}/`),
-			);
+			let list = (await queryCollection("categories")
+				.where("id", "LIKE", `categories/${loc}/%`)
+				.all()) as any[];
+			if (!list?.length) {
+				const all = (await queryCollection("categories").all()) as any[];
+				list = all.filter((c: any) => {
+					const id = ((c?.id as string) || "").replace(/^\//, "");
+					const path = (c?.path as string) || "";
+					return (
+						id.startsWith(`categories/${loc}/`)
+						|| path.startsWith(`/categories/${loc}/`)
+					);
+				});
+			}
 			const bySlug = (list as any[]).find((c: any) => {
 				const base = (c.id as string) || (c.path as string) || "";
 				return base.replace(/\.[^/.]+$/, "").endsWith(`/${slug.value}`);
@@ -56,8 +64,8 @@
 	);
 
 	function toBlogPostPathFromDoc(p: any) {
-		const raw =
-			p?.seo?.slug || (p?.path as string)?.replace(/^\/posts\/[^/]+\//, "");
+		// Usa sempre o basename do arquivo (em inglês) como slug canônico
+		const raw = (p?.path as string)?.replace(/^\/posts\/[^/]+\//, "");
 		return localePath(`/blog/posts/${raw}`);
 	}
 
