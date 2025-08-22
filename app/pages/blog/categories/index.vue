@@ -27,25 +27,23 @@
 	const { data: categories } = await useAsyncData(
 		() => `categories:${locale.value}`,
 		async () => {
-			const loc = locale.value.toLowerCase();
-			let list = (await queryCollection("categories")
-				.where("id", "LIKE", `categories/${loc}/%`)
-				.all()) as any[];
-			if (!list?.length) {
-				const all = (await queryCollection("categories").all()) as any[];
-				list = all.filter((c: any) => {
-					const id = ((c?.id as string) || "").replace(/^\//, "");
-					const path = (c?.path as string) || "";
-					return (
-						id.startsWith(`categories/${loc}/`)
-						|| path.startsWith(`/categories/${loc}/`)
-					);
-				});
-			}
-			if (!list.length) {
-				const all = (await queryCollection("categories").all()) as any[];
-				list = all;
-			}
+			const loc = locale.value.toLowerCase().split("-")[0];
+			// Filtra em memória considerando múltiplos campos possíveis
+			const all = (await queryCollection("categories").all()) as any[];
+			const re = new RegExp(`(^|\\/)categories\\/${loc}\\/`);
+			const list = all.filter((c: any) => {
+				const candidates = [
+					(c as any)?.id,
+					(c as any)?._path,
+					(c as any)?.path,
+					(c as any)?._file,
+					(c as any)?._source,
+					(c as any)?._id,
+				]
+					.map((v) => (typeof v === "string" ? v : ""))
+					.filter(Boolean);
+				return candidates.some((str) => re.test(str));
+			});
 			return list.map((c: any) => {
 				const base = (c.id as string) || (c.path as string) || "";
 				return {
