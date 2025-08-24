@@ -21,6 +21,11 @@ export default defineNuxtConfig({
 	ui: {
 		prefix: "Nuxt",
 	},
+	icon: {
+		serverBundle: {
+			collections: ["material-symbols"],
+		},
+	},
 	i18n: {
 		locales: [
 			{ code: "en", name: "English", language: "en", file: "en.json" },
