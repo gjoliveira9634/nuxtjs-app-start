@@ -54,7 +54,7 @@
 		<div
 			v-if="(posts || []).length"
 			class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-			<BlogPostCard
+			<BlogCardPost
 				v-for="post in posts || []"
 				:key="post.path"
 				:item="post"

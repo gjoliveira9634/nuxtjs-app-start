@@ -65,7 +65,7 @@
 		<div
 			v-if="seriesList.length"
 			class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-			<BlogSeriesCard
+			<BlogCardSerie
 				v-for="s in seriesList"
 				:key="s.title"
 				:item="s"

@@ -66,7 +66,7 @@
 		<div
 			v-if="categoriesList.length"
 			class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-			<BlogCategoryCard
+			<BlogCardCategory
 				v-for="c in categoriesList"
 				:key="c.slug || c.name"
 				:item="c"
