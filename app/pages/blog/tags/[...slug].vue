@@ -3,39 +3,36 @@
 	const route = useRoute();
 	const { t, locale } = useI18n();
 	const localePath = useLocalePath();
-	import { usePagination } from "~/composables/usePagination";
 
 	const slug = computed(() => (route.params.slug as string[]).join("/"));
 
-	// Autor a partir de arquivos .md em /authors/<locale>/*.md
-	const { data: author } = await useAsyncData(
-		() => `author:${locale.value}:${slug.value}`,
+	const { data: tag } = await useAsyncData(
+		() => `tag:${locale.value}:${slug.value}`,
 		async () => {
 			const loc = locale.value.toLowerCase();
-			const all = (await queryCollection("authors").all()) as any[];
-			const list = all.filter((a: any) =>
-				((a?.path as string) || "").startsWith(`/authors/${loc}/`),
+			const all = (await (queryCollection as any)("tags").all()) as any[];
+			const list = all.filter((c: any) =>
+				((c?.path as string) || "").startsWith(`/tags/${loc}/`),
 			);
-			const byPath = list.find((a: any) =>
-				(a.path as string).endsWith(`/${slug.value}`),
+			const bySlug = list.find((c: any) =>
+				(c.path as string).endsWith(`/${slug.value}`),
 			);
-			if (byPath) return byPath;
+			if (bySlug) return bySlug as any;
 			const norm = slug.value.toLowerCase().replace(/\s+/g, "-");
 			return (
 				list.find(
-					(a: any) => a.name?.toLowerCase().replace(/\s+/g, "-") === norm,
+					(c: any) => c.name?.toLowerCase().replace(/\s+/g, "-") === norm,
 				) || null
 			);
 		},
 		{ watch: [locale, slug] },
 	);
 
-	// Posts do autor no locale atual
 	const route2 = useRoute();
 	const q = computed(() => (route2.query.q as string) || "");
 
 	const { data: posts } = await useAsyncData(
-		() => `authorPosts:${locale.value}:${slug.value}`,
+		() => `tagPosts:${locale.value}:${slug.value}`,
 		async () => {
 			const all = await queryCollection("posts").all();
 			const base = `/posts/${locale.value.toLowerCase()}/`;
@@ -47,17 +44,15 @@
 					(a: any, b: any) =>
 						new Date(b.date).getTime() - new Date(a.date).getTime(),
 				);
-			if (author.value?.name) {
-				return list.filter((p: any) => p.author?.name === author.value.name);
-			}
 			const norm = slug.value.toLowerCase().replace(/\s+/g, "-");
-			return list.filter(
-				(p: any) =>
-					p.author?.name
-					&& p.author.name.toLowerCase().replace(/\s+/g, "-") === norm,
-			);
+			return list.filter((p: any) => {
+				if (p.draft) return false;
+				const tgs = (p.tags || []) as string[];
+				const asSlug = tgs.map((x) => x.toLowerCase().replace(/\s+/g, "-"));
+				return tgs.includes(slug.value) || asSlug.includes(norm);
+			});
 		},
-		{ watch: [locale, slug, author] },
+		{ watch: [locale, slug] },
 	);
 
 	const filtered = computed(() => {
@@ -79,14 +74,15 @@
 	);
 
 	function toBlogPostPathFromDoc(p: any) {
+		// Usa sempre o basename do arquivo (em inglês) como slug canônico
 		const raw = (p?.path as string)?.replace(/^\/posts\/[^/]+\//, "");
 		return localePath(`/blog/posts/${raw}`);
 	}
 
-	const title = computed(
-		() => `${author.value?.name || slug.value} — ${t("post.author")}`,
+	const pageTitle = computed(
+		() => `${tag.value?.name || slug.value} — ${t("blog.tags")}`,
 	);
-	useSeoMeta({ title, ogTitle: title });
+	useSeoMeta({ title: pageTitle, ogTitle: pageTitle });
 	const i18nHead = useLocaleHead({ addSeoAttributes: true } as any);
 	watchEffect(() => {
 		const v = (i18nHead as any).value || {};
@@ -100,60 +96,30 @@
 
 <template>
 	<div class="py-8">
-		<div
-			v-if="author"
-			class="mb-6 flex items-center gap-3">
-			<img
-				v-if="author.avatar"
-				:src="author.avatar"
-				:alt="author.name"
-				class="h-16 w-16 rounded-full object-cover" />
-			<div>
-				<h1 class="text-2xl font-semibold">{{ author.name }}</h1>
-				<p
-					v-if="author.bio"
-					class="text-sm text-gray-600 dark:text-gray-400"
-					>{{ author.bio }}</p
-				>
-			</div>
+		<div class="mb-6">
+			<h1 class="text-2xl font-semibold">{{ (tag && tag.name) || slug }}</h1>
+			<p
+				v-if="tag?.description"
+				class="text-sm text-gray-600 dark:text-gray-400"
+				>{{ tag.description }}</p
+			>
 		</div>
 
-		<!-- Corpo em Markdown do autor -->
+		<!-- Corpo em Markdown da tag -->
 		<div
-			v-if="author"
+			v-if="tag"
 			class="prose dark:prose-invert mx-auto mb-8 max-w-3xl">
-			<ContentRenderer :value="author" />
+			<ContentRenderer :value="tag" />
 		</div>
 
 		<div
 			v-if="(pagedItems || []).length"
 			class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-			<article
+			<BlogCardPost
 				v-for="post in pagedItems || []"
 				:key="post.path"
-				class="overflow-hidden rounded-lg border bg-white dark:border-gray-800 dark:bg-gray-900">
-				<NuxtLink
-					:to="toBlogPostPathFromDoc(post)"
-					class="block">
-					<div class="aspect-[16/9] w-full bg-gray-100 dark:bg-gray-800">
-						<img
-							v-if="post.cover?.image"
-							:src="post.cover.image"
-							:alt="post.cover?.alt || post.title"
-							class="h-full w-full object-cover" />
-					</div>
-					<div class="p-4">
-						<h3 class="line-clamp-2 text-base font-semibold">{{
-							post.title
-						}}</h3>
-						<p
-							v-if="post.excerpt || post.description"
-							class="mt-2 line-clamp-3 text-sm text-gray-700 dark:text-gray-300"
-							>{{ post.excerpt || post.description }}</p
-						>
-					</div>
-				</NuxtLink>
-			</article>
+				:item="post"
+				:to="toBlogPostPathFromDoc(post)" />
 		</div>
 		<div
 			v-else

@@ -1,0 +1,9 @@
+---
+name: Nuxt
+description: Tutoriales y consejos sobre Nuxt y su ecosistema.
+color: "#00DC82"
+icon: i-logos-nuxt-icon
+featured: true
+---
+
+Todo sobre Nuxt.

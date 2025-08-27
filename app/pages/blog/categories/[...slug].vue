@@ -3,6 +3,7 @@
 	const route = useRoute();
 	const { t, locale } = useI18n();
 	const localePath = useLocalePath();
+	import { usePagination } from "~/composables/usePagination";
 
 	const slug = computed(() => (route.params.slug as string[]).join("/"));
 
@@ -10,34 +11,26 @@
 		() => `category:${locale.value}:${slug.value}`,
 		async () => {
 			const loc = locale.value.toLowerCase();
-			let list = (await queryCollection("categories")
-				.where("id", "LIKE", `categories/${loc}/%`)
-				.all()) as any[];
-			if (!list?.length) {
-				const all = (await queryCollection("categories").all()) as any[];
-				list = all.filter((c: any) => {
-					const id = ((c?.id as string) || "").replace(/^\//, "");
-					const path = (c?.path as string) || "";
-					return (
-						id.startsWith(`categories/${loc}/`)
-						|| path.startsWith(`/categories/${loc}/`)
-					);
-				});
-			}
-			const bySlug = (list as any[]).find((c: any) => {
-				const base = (c.id as string) || (c.path as string) || "";
-				return base.replace(/\.[^/.]+$/, "").endsWith(`/${slug.value}`);
-			});
-			if (bySlug) return bySlug;
+			const all = (await queryCollection("categories").all()) as any[];
+			const list = all.filter((c: any) =>
+				((c?.path as string) || "").startsWith(`/categories/${loc}/`),
+			);
+			const bySlug = list.find((c: any) =>
+				(c.path as string).endsWith(`/${slug.value}`),
+			);
+			if (bySlug) return bySlug as any;
 			const norm = slug.value.toLowerCase().replace(/\s+/g, "-");
 			return (
-				(list as any[]).find(
+				list.find(
 					(c: any) => c.name?.toLowerCase().replace(/\s+/g, "-") === norm,
 				) || null
 			);
 		},
 		{ watch: [locale, slug] },
 	);
+
+	const route2 = useRoute();
+	const q = computed(() => (route2.query.q as string) || "");
 
 	const { data: posts } = await useAsyncData(
 		() => `categoryPosts:${locale.value}:${slug.value}`,
@@ -61,6 +54,24 @@
 			});
 		},
 		{ watch: [locale, slug] },
+	);
+
+	const filtered = computed(() => {
+		const list = (posts.value as any[]) || [];
+		if (!q.value) return list;
+		const s = q.value.toLowerCase();
+		return list.filter(
+			(p) =>
+				(p.title || "").toLowerCase().includes(s)
+				|| (p.description || "").toLowerCase().includes(s)
+				|| (p.excerpt || "").toLowerCase().includes(s)
+				|| (p.tags || []).join(" ").toLowerCase().includes(s),
+		);
+	});
+
+	const { page, totalPages, pagedItems, setPage } = usePagination(
+		() => filtered.value,
+		{ defaultPerPage: 12 },
 	);
 
 	function toBlogPostPathFromDoc(p: any) {
@@ -97,11 +108,18 @@
 			>
 		</div>
 
+		<!-- Corpo em Markdown da categoria -->
 		<div
-			v-if="(posts || []).length"
+			v-if="category"
+			class="prose dark:prose-invert mx-auto mb-8 max-w-3xl">
+			<ContentRenderer :value="category" />
+		</div>
+
+		<div
+			v-if="(pagedItems || []).length"
 			class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 			<BlogCardPost
-				v-for="post in posts || []"
+				v-for="post in pagedItems || []"
 				:key="post.path"
 				:item="post"
 				:to="toBlogPostPathFromDoc(post)" />
@@ -111,5 +129,10 @@
 			class="rounded-md border border-gray-200 bg-white p-6 text-center text-sm text-gray-600 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
 			{{ $t("blog.noResults") }}
 		</div>
+		<BlogPagination
+			v-if="(pagedItems || []).length"
+			:page="page"
+			:total-pages="totalPages"
+			@update:page="setPage" />
 	</div>
 </template>

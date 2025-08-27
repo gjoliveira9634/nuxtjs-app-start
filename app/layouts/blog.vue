@@ -26,6 +26,16 @@
 	);
 	function onSearchInput(e: Event) {
 		const value = (e.target as HTMLInputElement).value;
+		const isBlogPost = (route.name?.toString() || "").startsWith(
+			"blog-posts-slug",
+		);
+		if (isBlogPost) {
+			// Se estiver em um post individual, redireciona para a listagem de posts
+			// preservando a busca digitada no query param `q`.
+			const target = localePath("/blog/posts");
+			router.replace({ path: target, query: value ? { q: value } : {} });
+			return;
+		}
 		updateQuery({ q: value });
 	}
 
@@ -212,6 +222,11 @@
 						class="underline-offset-2 hover:underline"
 						>{{ t("blog.categories") }}</NuxtLink
 					>
+					<NuxtLink
+						:to="localePath('/blog/tags')"
+						class="underline-offset-2 hover:underline"
+						>{{ t("blog.tags") }}</NuxtLink
+					>
 
 					<NuxtLink
 						:to="localePath('/blog/posts')"
@@ -254,6 +269,11 @@
 							:to="localePath('/blog/categories')"
 							class="underline-offset-2 hover:underline"
 							>{{ t("blog.categories") }}</NuxtLink
+						>
+						<NuxtLink
+							:to="localePath('/blog/tags')"
+							class="underline-offset-2 hover:underline"
+							>{{ t("blog.tags") }}</NuxtLink
 						>
 						<NuxtLink
 							:to="localePath('/blog/posts')"

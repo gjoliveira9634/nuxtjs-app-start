@@ -1,10 +1,13 @@
 <script setup lang="ts">
 	import { useAsyncData, useHead, useSeoMeta } from "nuxt/app";
 	import { computed, watchEffect } from "vue";
+	import { usePagination } from "~/composables/usePagination";
 
 	definePageMeta({ layout: "blog" });
 	const { t, locale } = useI18n();
 	const localePath = useLocalePath() as any;
+	const route = useRoute();
+	const q = computed(() => (route.query.q as string) || "");
 
 	const title = computed(() => t("post.series"));
 	const description = computed(() => t("site.tagline"));
@@ -29,32 +32,33 @@
 		() => `series:${locale.value}`,
 		async () => {
 			const loc = locale.value.toLowerCase().split("-")[0];
-			// Filtra em memória considerando múltiplos campos possíveis
 			const all = (await queryCollection("series").all()) as any[];
-			const re = new RegExp(`(^|\\/)series\\/${loc}\\/`);
-			const list = all.filter((s: any) => {
-				const candidates = [
-					(s as any)?.id,
-					(s as any)?._path,
-					(s as any)?.path,
-					(s as any)?._file,
-					(s as any)?._source,
-					(s as any)?._id,
-				]
-					.map((v) => (typeof v === "string" ? v : ""))
-					.filter(Boolean);
-				return candidates.some((str) => re.test(str));
-			});
-			return list;
+			return all.filter((s: any) =>
+				((s?.path as string) || "").startsWith(`/series/${loc}/`),
+			);
 		},
 		{ watch: [locale] },
 	);
 
-	const seriesList = computed(() => (series.value as any[]) || []);
+	const seriesList = computed(() => {
+		const list = (series.value as any[]) || [];
+		if (!q.value) return list;
+		const s = q.value.toLowerCase();
+		return list.filter(
+			(item) =>
+				(item.title || "").toLowerCase().includes(s)
+				|| (item.description || "").toLowerCase().includes(s),
+		);
+	});
+
+	const { page, totalPages, pagedItems, setPage } = usePagination(
+		() => seriesList.value,
+		{ defaultPerPage: 9 },
+	);
 
 	function seriesSlug(s: any) {
-		const p = (s?.id as string) || (s?.path as string) || "";
-		if (p) return p.replace(/^\/?series\/[^/]+\//, "").replace(/\.[^/.]+$/, "");
+		const p = (s?.path as string) || "";
+		if (p) return p.replace(/^\/?series\/[^/]+\//, "");
 		return (s?.title || "").toLowerCase().replace(/\s+/g, "-");
 	}
 </script>
@@ -63,10 +67,10 @@
 	<div class="py-8">
 		<h1 class="mb-6 text-3xl font-semibold">{{ t("post.series") }}</h1>
 		<div
-			v-if="seriesList.length"
+			v-if="(pagedItems || []).length"
 			class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			<BlogCardSerie
-				v-for="s in seriesList"
+				v-for="s in pagedItems || []"
 				:key="s.title"
 				:item="s"
 				:to="localePath(`/blog/series/${encodeURIComponent(seriesSlug(s))}`)" />
@@ -76,5 +80,10 @@
 			class="rounded-md border border-gray-200 bg-white p-6 text-center text-sm text-gray-600 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
 			{{ t("blog.noResults") }}
 		</div>
+		<BlogPagination
+			v-if="(pagedItems || []).length"
+			:page="page"
+			:total-pages="totalPages"
+			@update:page="setPage" />
 	</div>
 </template>
