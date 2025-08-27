@@ -3,6 +3,7 @@
 	const route = useRoute();
 	const { t, locale } = useI18n();
 	const localePath = useLocalePath();
+	import { usePagination } from "~/composables/usePagination";
 
 	const slug = computed(() => (route.params.slug as string[]).join("/"));
 
@@ -23,6 +24,9 @@
 		},
 		{ watch: [locale, slug] },
 	);
+
+	const route2 = useRoute();
+	const q = computed(() => (route2.query.q as string) || "");
 
 	const { data: posts } = await useAsyncData(
 		() => `seriePosts:${locale.value}:${slug.value}`,
@@ -51,6 +55,24 @@
 				);
 		},
 		{ watch: [locale, slug, serie] },
+	);
+
+	const filtered = computed(() => {
+		const list = (posts.value as any[]) || [];
+		if (!q.value) return list;
+		const s = q.value.toLowerCase();
+		return list.filter(
+			(p) =>
+				(p.title || "").toLowerCase().includes(s)
+				|| (p.description || "").toLowerCase().includes(s)
+				|| (p.excerpt || "").toLowerCase().includes(s)
+				|| (p.tags || []).join(" ").toLowerCase().includes(s),
+		);
+	});
+
+	const { page, totalPages, pagedItems, setPage } = usePagination(
+		() => filtered.value,
+		{ defaultPerPage: 12 },
 	);
 
 	function toBlogPostPathFromDoc(p: any) {
@@ -91,9 +113,9 @@
 			</div>
 		</div>
 
-		<ol class="space-y-3">
+		<ol v-if="(pagedItems || []).length" class="space-y-3">
 			<li
-				v-for="post in posts || []"
+			v-for="post in pagedItems || []"
 				:key="post.path"
 				class="rounded-md border bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
 				<NuxtLink
@@ -111,6 +133,16 @@
 					>#{{ post.seriesOrder }}</span
 				>
 			</li>
-		</ol>
+			</ol>
+			<div
+				v-else
+				class="rounded-md border border-gray-200 bg-white p-6 text-center text-sm text-gray-600 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
+				{{ $t("blog.noResults") }}
+			</div>
+			<BlogPagination
+				v-if="(pagedItems || []).length"
+				:page="page"
+				:total-pages="totalPages"
+				@update:page="setPage" />
 	</div>
 </template>

@@ -28,6 +28,9 @@
 		{ watch: [locale, slug] },
 	);
 
+	const route2 = useRoute();
+	const q = computed(() => (route2.query.q as string) || "");
+
 	const { data: posts } = await useAsyncData(
 		() => `tagPosts:${locale.value}:${slug.value}`,
 		async () => {
@@ -50,6 +53,24 @@
 			});
 		},
 		{ watch: [locale, slug] },
+	);
+
+	const filtered = computed(() => {
+		const list = (posts.value as any[]) || [];
+		if (!q.value) return list;
+		const s = q.value.toLowerCase();
+		return list.filter(
+			(p) =>
+				(p.title || "").toLowerCase().includes(s)
+				|| (p.description || "").toLowerCase().includes(s)
+				|| (p.excerpt || "").toLowerCase().includes(s)
+				|| (p.tags || []).join(" ").toLowerCase().includes(s),
+		);
+	});
+
+	const { page, totalPages, pagedItems, setPage } = usePagination(
+		() => filtered.value,
+		{ defaultPerPage: 12 },
 	);
 
 	function toBlogPostPathFromDoc(p: any) {
@@ -92,10 +113,10 @@
 		</div>
 
 		<div
-			v-if="(posts || []).length"
+			v-if="(pagedItems || []).length"
 			class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 			<BlogCardPost
-				v-for="post in posts || []"
+				v-for="post in pagedItems || []"
 				:key="post.path"
 				:item="post"
 				:to="toBlogPostPathFromDoc(post)" />
@@ -105,5 +126,10 @@
 			class="rounded-md border border-gray-200 bg-white p-6 text-center text-sm text-gray-600 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
 			{{ $t("blog.noResults") }}
 		</div>
+		<BlogPagination
+			v-if="(pagedItems || []).length"
+			:page="page"
+			:total-pages="totalPages"
+			@update:page="setPage" />
 	</div>
 </template>

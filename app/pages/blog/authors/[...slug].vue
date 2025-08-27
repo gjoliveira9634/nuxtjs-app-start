@@ -3,6 +3,7 @@
 	const route = useRoute();
 	const { t, locale } = useI18n();
 	const localePath = useLocalePath();
+	import { usePagination } from "~/composables/usePagination";
 
 	const slug = computed(() => (route.params.slug as string[]).join("/"));
 
@@ -30,6 +31,9 @@
 	);
 
 	// Posts do autor no locale atual
+	const route2 = useRoute();
+	const q = computed(() => (route2.query.q as string) || "");
+
 	const { data: posts } = await useAsyncData(
 		() => `authorPosts:${locale.value}:${slug.value}`,
 		async () => {
@@ -54,6 +58,24 @@
 			);
 		},
 		{ watch: [locale, slug, author] },
+	);
+
+	const filtered = computed(() => {
+		const list = (posts.value as any[]) || [];
+		if (!q.value) return list;
+		const s = q.value.toLowerCase();
+		return list.filter(
+			(p) =>
+				(p.title || "").toLowerCase().includes(s)
+				|| (p.description || "").toLowerCase().includes(s)
+				|| (p.excerpt || "").toLowerCase().includes(s)
+				|| (p.tags || []).join(" ").toLowerCase().includes(s),
+		);
+	});
+
+	const { page, totalPages, pagedItems, setPage } = usePagination(
+		() => filtered.value,
+		{ defaultPerPage: 12 },
 	);
 
 	function toBlogPostPathFromDoc(p: any) {
@@ -103,9 +125,11 @@
 			<ContentRenderer :value="author" />
 		</div>
 
-		<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+		<div
+			v-if="(pagedItems || []).length"
+			class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 			<article
-				v-for="post in posts || []"
+				v-for="post in pagedItems || []"
 				:key="post.path"
 				class="overflow-hidden rounded-lg border bg-white dark:border-gray-800 dark:bg-gray-900">
 				<NuxtLink
@@ -131,5 +155,15 @@
 				</NuxtLink>
 			</article>
 		</div>
+		<div
+			v-else
+			class="rounded-md border border-gray-200 bg-white p-6 text-center text-sm text-gray-600 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
+			{{ $t("blog.noResults") }}
+		</div>
+		<BlogPagination
+			v-if="(pagedItems || []).length"
+			:page="page"
+			:total-pages="totalPages"
+			@update:page="setPage" />
 	</div>
 </template>

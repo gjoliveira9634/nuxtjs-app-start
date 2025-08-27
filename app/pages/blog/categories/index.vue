@@ -2,6 +2,7 @@
 	definePageMeta({ layout: "blog" });
 	const { t, locale } = useI18n();
 	const localePath = useLocalePath();
+	import { usePagination } from "~/composables/usePagination";
 
 	const title = computed(() => t("blog.categories"));
 	const description = computed(() => t("site.tagline"));
@@ -24,6 +25,9 @@
 		});
 	});
 
+	const route = useRoute();
+	const q = computed(() => (route.query.q as string) || "");
+
 	const { data: categories } = await useAsyncData(
 		() => `categories:${locale.value}`,
 		async () => {
@@ -41,17 +45,31 @@
 		{ watch: [locale] },
 	);
 
-	const categoriesList = computed(() => (categories.value as any[]) || []);
+	const categoriesList = computed(() => {
+		const list = (categories.value as any[]) || [];
+		if (!q.value) return list;
+		const s = q.value.toLowerCase();
+		return list.filter(
+			(c) =>
+				(c.name || "").toLowerCase().includes(s)
+				|| (c.description || "").toLowerCase().includes(s),
+		);
+	});
+
+	const { page, totalPages, pagedItems, setPage } = usePagination(
+		() => categoriesList.value,
+		{ defaultPerPage: 12 },
+	);
 </script>
 
 <template>
 	<div class="py-8">
 		<h1 class="mb-6 text-3xl font-semibold">{{ $t("blog.categories") }}</h1>
 		<div
-			v-if="categoriesList.length"
+			v-if="(pagedItems || []).length"
 			class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			<BlogCardCategory
-				v-for="c in categoriesList"
+				v-for="c in pagedItems || []"
 				:key="c.slug || c.name"
 				:item="c"
 				:to="
@@ -63,5 +81,10 @@
 			class="rounded-md border border-gray-200 bg-white p-6 text-center text-sm text-gray-600 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
 			{{ $t("blog.noResults") }}
 		</div>
+		<BlogPagination
+			v-if="(pagedItems || []).length"
+			:page="page"
+			:total-pages="totalPages"
+			@update:page="setPage" />
 	</div>
 </template>
