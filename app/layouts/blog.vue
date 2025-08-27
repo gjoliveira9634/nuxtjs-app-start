@@ -26,6 +26,16 @@
 	);
 	function onSearchInput(e: Event) {
 		const value = (e.target as HTMLInputElement).value;
+		const isBlogPost = (route.name?.toString() || "").startsWith(
+			"blog-posts-slug",
+		);
+		if (isBlogPost) {
+			// Se estiver em um post individual, redireciona para a listagem de posts
+			// preservando a busca digitada no query param `q`.
+			const target = localePath("/blog/posts");
+			router.replace({ path: target, query: value ? { q: value } : {} });
+			return;
+		}
 		updateQuery({ q: value });
 	}
 
