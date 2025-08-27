@@ -1,0 +1,9 @@
+---
+name: Conteúdo
+description: Guias relacionados ao @nuxt/content e gerenciamento de conteúdo.
+color: "#0EA5E9"
+icon: i-heroicons-document-text
+featured: false
+---
+
+Documentação e guias do Nuxt Content.

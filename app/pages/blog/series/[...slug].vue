@@ -10,31 +10,16 @@
 		() => `serie:${locale.value}:${slug.value}`,
 		async () => {
 			const loc = locale.value.toLowerCase();
-			let list = (await queryCollection("series")
-				.where("id", "LIKE", `series/${loc}/%`)
-				.all()) as any[];
-			if (!list?.length) {
-				const all = (await queryCollection("series").all()) as any[];
-				list = all.filter((s: any) => {
-					const id = ((s?.id as string) || "").replace(/^\//, "");
-					const path = (s?.path as string) || "";
-					return (
-						id.startsWith(`series/${loc}/`)
-						|| path.startsWith(`/series/${loc}/`)
-					);
-				});
-			}
-			const bySlug = (list as any[]).find((s: any) => {
-				const base = (s.id as string) || (s.path as string) || "";
-				return base.replace(/\.[^/.]+$/, "").endsWith(`/${slug.value}`);
-			});
-			if (bySlug) return bySlug;
-			const norm = slug.value.toLowerCase().replace(/\s+/g, "-");
-			return (
-				(list as any[]).find(
-					(s: any) => s.title?.toLowerCase().replace(/\s+/g, "-") === norm,
-				) || null
+			const all = (await queryCollection("series").all()) as any[];
+			const list = all.filter((s: any) =>
+				((s?.path as string) || "").startsWith(`/series/${loc}/`),
 			);
+			const bySlug = list.find((s: any) => (s.path as string).endsWith(`/${slug.value}`));
+			if (bySlug) return bySlug as any;
+			const norm = slug.value.toLowerCase().replace(/\s+/g, "-");
+			return list.find(
+				(s: any) => s.title?.toLowerCase().replace(/\s+/g, "-") === norm,
+			) || null;
 		},
 		{ watch: [locale, slug] },
 	);
@@ -100,6 +85,10 @@
 				class="text-sm text-gray-600 dark:text-gray-400"
 				>{{ serie.description }}</p
 			>
+			<!-- Corpo em Markdown da série -->
+			<div class="prose dark:prose-invert mx-auto mt-4 max-w-3xl">
+				<ContentRenderer :value="serie" />
+			</div>
 		</div>
 
 		<ol class="space-y-3">
@@ -113,6 +102,10 @@
 					>{{ post.title }}</NuxtLink
 				>
 				<span
+			<!-- Corpo em Markdown da série -->
+			<div v-if="serie" class="prose dark:prose-invert mx-auto mt-4 max-w-3xl">
+				<ContentRenderer :value="serie" />
+			</div>
 					v-if="post.seriesOrder"
 					class="ml-2 text-xs text-gray-500"
 					>#{{ post.seriesOrder }}</span

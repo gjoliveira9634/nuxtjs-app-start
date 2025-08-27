@@ -30,23 +30,10 @@
 		() => `authors:${locale.value}`,
 		async () => {
 			const loc = locale.value.toLowerCase().split("-")[0];
-			// Busca todos e filtra em memória considerando múltiplos campos possíveis
 			const all = (await queryCollection("authors").all()) as any[];
-			const re = new RegExp(`(^|\\/)authors\\/${loc}\\/`);
-			const list = all.filter((a: any) => {
-				const candidates = [
-					(a as any)?.id,
-					(a as any)?._path,
-					(a as any)?.path,
-					(a as any)?._file,
-					(a as any)?._source,
-					(a as any)?._id,
-				]
-					.map((v) => (typeof v === "string" ? v : ""))
-					.filter(Boolean);
-				return candidates.some((s) => re.test(s));
-			});
-			return list;
+			return all.filter((a: any) =>
+				((a?.path as string) || "").startsWith(`/authors/${loc}/`),
+			);
 		},
 		{ watch: [locale] },
 	);
@@ -54,10 +41,8 @@
 	const authorsList = computed(() => (authors.value as any[]) || []);
 
 	function authorSlug(a: any) {
-		const p =
-			(a?._path as string) || (a?.path as string) || (a?.id as string) || "";
-		if (p)
-			return p.replace(/^\/?authors\/[^/]+\//, "").replace(/\.[^/.]+$/, "");
+		const p = (a?.path as string) || "";
+		if (p) return p.replace(/^\/?authors\/[^/]+\//, "");
 		return (a?.name || "").toLowerCase().replace(/\s+/g, "-");
 	}
 </script>

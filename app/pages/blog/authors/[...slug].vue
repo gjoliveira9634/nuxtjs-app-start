@@ -6,33 +6,22 @@
 
 	const slug = computed(() => (route.params.slug as string[]).join("/"));
 
+	// Autor a partir de arquivos .md em /authors/<locale>/*.md
 	const { data: author } = await useAsyncData(
 		() => `author:${locale.value}:${slug.value}`,
 		async () => {
 			const loc = locale.value.toLowerCase();
-			let list = (await queryCollection("authors")
-				.where("id", "LIKE", `authors/${loc}/%`)
-				.all()) as any[];
-			if (!list?.length) {
-				const all = (await queryCollection("authors").all()) as any[];
-				list = all.filter((a: any) => {
-					const id = ((a?.id as string) || "").replace(/^\//, "");
-					const path = (a?.path as string) || "";
-					return (
-						id.startsWith(`authors/${loc}/`)
-						|| path.startsWith(`/authors/${loc}/`)
-					);
-				});
-			}
-			// Match by file slug (path) or by normalized name
-			const bySlug = (list as any[]).find((a: any) => {
-				const base = (a.id as string) || (a.path as string) || "";
-				return base.replace(/\.[^/.]+$/, "").endsWith(`/${slug.value}`);
-			});
-			if (bySlug) return bySlug;
+			const all = (await queryCollection("authors").all()) as any[];
+			const list = all.filter((a: any) =>
+				((a?.path as string) || "").startsWith(`/authors/${loc}/`),
+			);
+			const byPath = list.find((a: any) =>
+				(a.path as string).endsWith(`/${slug.value}`),
+			);
+			if (byPath) return byPath;
 			const norm = slug.value.toLowerCase().replace(/\s+/g, "-");
 			return (
-				(list as any[]).find(
+				list.find(
 					(a: any) => a.name?.toLowerCase().replace(/\s+/g, "-") === norm,
 				) || null
 			);
@@ -40,6 +29,7 @@
 		{ watch: [locale, slug] },
 	);
 
+	// Posts do autor no locale atual
 	const { data: posts } = await useAsyncData(
 		() => `authorPosts:${locale.value}:${slug.value}`,
 		async () => {
@@ -53,17 +43,13 @@
 					(a: any, b: any) =>
 						new Date(b.date).getTime() - new Date(a.date).getTime(),
 				);
-			// Filter by exact author name if author resolved, else try by slug-name
 			if (author.value?.name) {
-				return list.filter(
-					(p: any) => !p.draft && p.author?.name === author.value.name,
-				);
+				return list.filter((p: any) => p.author?.name === author.value.name);
 			}
 			const norm = slug.value.toLowerCase().replace(/\s+/g, "-");
 			return list.filter(
 				(p: any) =>
-					!p.draft
-					&& p.author?.name
+					p.author?.name
 					&& p.author.name.toLowerCase().replace(/\s+/g, "-") === norm,
 			);
 		},
@@ -71,7 +57,6 @@
 	);
 
 	function toBlogPostPathFromDoc(p: any) {
-		// Usa sempre o basename do arquivo (em inglês) como slug canônico
 		const raw = (p?.path as string)?.replace(/^\/posts\/[^/]+\//, "");
 		return localePath(`/blog/posts/${raw}`);
 	}
@@ -109,6 +94,13 @@
 					>{{ author.bio }}</p
 				>
 			</div>
+		</div>
+
+		<!-- Corpo em Markdown do autor -->
+		<div
+			v-if="author"
+			class="prose dark:prose-invert mx-auto mb-8 max-w-3xl">
+			<ContentRenderer :value="author" />
 		</div>
 
 		<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

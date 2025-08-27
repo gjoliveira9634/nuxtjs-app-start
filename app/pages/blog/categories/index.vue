@@ -28,31 +28,15 @@
 		() => `categories:${locale.value}`,
 		async () => {
 			const loc = locale.value.toLowerCase().split("-")[0];
-			// Filtra em memória considerando múltiplos campos possíveis
 			const all = (await queryCollection("categories").all()) as any[];
-			const re = new RegExp(`(^|\\/)categories\\/${loc}\\/`);
-			const list = all.filter((c: any) => {
-				const candidates = [
-					(c as any)?.id,
-					(c as any)?._path,
-					(c as any)?.path,
-					(c as any)?._file,
-					(c as any)?._source,
-					(c as any)?._id,
-				]
-					.map((v) => (typeof v === "string" ? v : ""))
-					.filter(Boolean);
-				return candidates.some((str) => re.test(str));
-			});
-			return list.map((c: any) => {
-				const base = (c.id as string) || (c.path as string) || "";
-				return {
+			return all
+				.filter((c: any) =>
+					((c?.path as string) || "").startsWith(`/categories/${loc}/`),
+				)
+				.map((c: any) => ({
 					...c,
-					slug: base
-						.replace(/^\/?categories\/[^/]+\//, "")
-						.replace(/\.[^/.]+$/, ""),
-				};
-			});
+					slug: (c.path as string).replace(/^\/?categories\/[^/]+\//, ""),
+				}));
 		},
 		{ watch: [locale] },
 	);

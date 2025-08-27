@@ -224,10 +224,10 @@ export default defineContentConfig({
 			}),
 		}),
 
-		// 🏷️ Coleção de Categorias
+		// 🏷️ Coleção de Categorias (agora em Markdown)
 		categories: defineCollection({
-			type: "data",
-			source: "categories/**/*.json",
+			type: "page",
+			source: "categories/**/*.md",
 			schema: type.object({
 				name: type.string().min(2, "Nome muito curto"),
 				description: type.string().max(300),
@@ -240,10 +240,10 @@ export default defineContentConfig({
 			}),
 		}),
 
-		// 👤 Coleção de Autores
+		// 👤 Coleção de Autores (agora em Markdown)
 		authors: defineCollection({
-			type: "data",
-			source: "authors/**/*.json",
+			type: "page",
+			source: "authors/**/*.md",
 			schema: type.object({
 				name: type.string().min(2),
 				email: type.string().email(),
@@ -262,10 +262,10 @@ export default defineContentConfig({
 			}),
 		}),
 
-		// 📚 Coleção de Séries
+		// 📚 Coleção de Séries (agora em Markdown)
 		series: defineCollection({
-			type: "data",
-			source: "series/**/*.json",
+			type: "page",
+			source: "series/**/*.md",
 			schema: type.object({
 				title: type.string().min(3),
 				description: type.string().max(300),

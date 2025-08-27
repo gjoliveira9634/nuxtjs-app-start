@@ -29,23 +29,10 @@
 		() => `series:${locale.value}`,
 		async () => {
 			const loc = locale.value.toLowerCase().split("-")[0];
-			// Filtra em memória considerando múltiplos campos possíveis
 			const all = (await queryCollection("series").all()) as any[];
-			const re = new RegExp(`(^|\\/)series\\/${loc}\\/`);
-			const list = all.filter((s: any) => {
-				const candidates = [
-					(s as any)?.id,
-					(s as any)?._path,
-					(s as any)?.path,
-					(s as any)?._file,
-					(s as any)?._source,
-					(s as any)?._id,
-				]
-					.map((v) => (typeof v === "string" ? v : ""))
-					.filter(Boolean);
-				return candidates.some((str) => re.test(str));
-			});
-			return list;
+			return all.filter((s: any) =>
+				((s?.path as string) || "").startsWith(`/series/${loc}/`),
+			);
 		},
 		{ watch: [locale] },
 	);
@@ -53,8 +40,8 @@
 	const seriesList = computed(() => (series.value as any[]) || []);
 
 	function seriesSlug(s: any) {
-		const p = (s?.id as string) || (s?.path as string) || "";
-		if (p) return p.replace(/^\/?series\/[^/]+\//, "").replace(/\.[^/.]+$/, "");
+		const p = (s?.path as string) || "";
+		if (p) return p.replace(/^\/?series\/[^/]+\//, "");
 		return (s?.title || "").toLowerCase().replace(/\s+/g, "-");
 	}
 </script>
