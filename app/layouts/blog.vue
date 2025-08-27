@@ -212,6 +212,11 @@
 						class="underline-offset-2 hover:underline"
 						>{{ t("blog.categories") }}</NuxtLink
 					>
+					<NuxtLink
+						:to="localePath('/blog/tags')"
+						class="underline-offset-2 hover:underline"
+						>{{ t("blog.tags") }}</NuxtLink
+					>
 
 					<NuxtLink
 						:to="localePath('/blog/posts')"
@@ -254,6 +259,11 @@
 							:to="localePath('/blog/categories')"
 							class="underline-offset-2 hover:underline"
 							>{{ t("blog.categories") }}</NuxtLink
+						>
+						<NuxtLink
+							:to="localePath('/blog/tags')"
+							class="underline-offset-2 hover:underline"
+							>{{ t("blog.tags") }}</NuxtLink
 						>
 						<NuxtLink
 							:to="localePath('/blog/posts')"

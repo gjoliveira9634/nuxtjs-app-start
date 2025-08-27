@@ -280,5 +280,21 @@ export default defineContentConfig({
 				featured: type.boolean().default(false),
 			}),
 		}),
+
+		// 🏷️ Coleção de Tags (agora em Markdown)
+		tags: defineCollection({
+			type: "page",
+			source: "tags/**/*.md",
+			schema: type.object({
+				name: type.string().min(1, "Nome da tag muito curto"),
+				description: type.string().max(300).optional(),
+				color: type
+					.string()
+					.regex(/^#[0-9A-F]{6}$/i, "Cor deve estar em formato hex")
+					.optional(),
+				icon: type.string().optional(),
+				featured: type.boolean().default(false),
+			}),
+		}),
 	},
 });
