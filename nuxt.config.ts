@@ -47,6 +47,14 @@ export default defineNuxtConfig({
 				})()),
 	},
 	content: {
+		preview: {
+			api: "https://api.nuxt.studio",
+			gitInfo: {
+				name: process.env.GIT_NAME || "Your repository name",
+				url: process.env.GIT_URL || "Your GitHub repository URL",
+				owner: process.env.GIT_OWNER || "Your repository owner/organization",
+			},
+		},
 		database: {
 			type: "postgres",
 			url:
