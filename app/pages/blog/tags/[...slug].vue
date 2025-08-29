@@ -68,10 +68,32 @@
 		);
 	});
 
-	const { page, totalPages, pagedItems, setPage } = usePagination(
-		() => filtered.value,
-		{ defaultPerPage: 12 },
+	const {
+		page,
+		perPage,
+		totalItems,
+		totalPages,
+		pagedItems,
+		setPage,
+		setPerPage,
+	} = usePagination(() => filtered.value, { defaultPerPage: 9 });
+	watch(
+		() => perPage.value,
+		(v) => {
+			if (v !== 9) setPerPage(9);
+		},
+		{ immediate: true },
 	);
+	const showingFrom = computed(() =>
+		totalItems.value ? (page.value - 1) * perPage.value + 1 : 0,
+	);
+	const showingTo = computed(() =>
+		Math.min(totalItems.value, page.value * perPage.value),
+	);
+	function toPage(p: number) {
+		const query: Record<string, any> = { ...route.query, page: p };
+		return { query, hash: "#tag-posts" } as any;
+	}
 
 	function toBlogPostPathFromDoc(p: any) {
 		// Usa sempre o basename do arquivo (em inglês) como slug canônico
@@ -113,8 +135,24 @@
 		</div>
 
 		<div
+			class="mb-3 flex flex-wrap items-center justify-between gap-3"
+			v-if="(pagedItems || []).length && totalPages > 1">
+			<div class="text-xs text-gray-600 dark:text-gray-400"
+				>{{ showingFrom }}–{{ showingTo }} / {{ totalItems }}</div
+			>
+			<NuxtPagination
+				:page="page"
+				:total="totalItems"
+				:items-per-page="perPage"
+				:sibling-count="1"
+				show-edges
+				:to="toPage"
+				@update:page="setPage" />
+		</div>
+		<div
 			v-if="(pagedItems || []).length"
-			class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+			class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+			id="tag-posts">
 			<BlogCardPost
 				v-for="post in pagedItems || []"
 				:key="post.path"
@@ -126,10 +164,20 @@
 			class="rounded-md border border-gray-200 bg-white p-6 text-center text-sm text-gray-600 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
 			{{ $t("blog.noResults") }}
 		</div>
-		<BlogPagination
-			v-if="(pagedItems || []).length"
-			:page="page"
-			:total-pages="totalPages"
-			@update:page="setPage" />
+		<div
+			class="mt-4 flex flex-wrap items-center justify-between gap-3"
+			v-if="(pagedItems || []).length && totalPages > 1">
+			<div class="text-xs text-gray-600 dark:text-gray-400"
+				>{{ showingFrom }}–{{ showingTo }} / {{ totalItems }}</div
+			>
+			<NuxtPagination
+				:page="page"
+				:total="totalItems"
+				:items-per-page="perPage"
+				:sibling-count="1"
+				show-edges
+				:to="toPage"
+				@update:page="setPage" />
+		</div>
 	</div>
 </template>

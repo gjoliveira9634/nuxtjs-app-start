@@ -51,57 +51,7 @@
 		updateQuery({ q: undefined, cat: undefined, tag: undefined });
 	}
 
-	// Fetch categories for sidebar (locale aware)
-	const { data: categories } = await useAsyncData(
-		() => `blog:categories:${locale.value}`,
-		async () => {
-			const loc = locale.value.toLowerCase();
-			const list = await queryCollection("categories")
-				.where("id", "LIKE", `categories/${loc}/%`)
-				.all();
-			return (list as any[]).map((c: any) => {
-				const base = (c.id as string) || (c.path as string) || "";
-				return {
-					...c,
-					slug: base
-						.replace(/^\/?categories\/[^/]+\//, "")
-						.replace(/\.[^/.]+$/, ""),
-				};
-			});
-		},
-		{ watch: [locale] },
-	);
-
-	// Compute tag cloud from posts of current locale
-	const { data: tagCloud } = await useAsyncData(
-		() => `blog:tagCloud:${locale.value}`,
-		async () => {
-			const posts = await queryCollection("posts").all();
-			const base = `/posts/${locale.value.toLowerCase()}/`;
-			const scoped = posts.filter(
-				(p: any) => ((p.path as string) || "").startsWith(base) && !p.draft,
-			);
-			const freq = new Map<string, number>();
-			for (const p of scoped) {
-				for (const tag of (p.tags as string[]) || []) {
-					freq.set(tag, (freq.get(tag) || 0) + 1);
-				}
-			}
-			return Array.from(freq.entries())
-				.sort((a, b) => b[1] - a[1])
-				.map(([tag, count]) => ({ tag, count }));
-		},
-		{ watch: [locale] },
-	);
-
-	// Deterministic color for tags
-	function tagColor(tag: string) {
-		let hash = 0;
-		for (let i = 0; i < tag.length; i++)
-			hash = (hash << 5) - hash + tag.charCodeAt(i);
-		const hue = Math.abs(hash) % 360;
-		return `hsl(${hue} 70% 45%)`;
-	}
+	// Sidebar data now moved into dedicated components under components/blog/side
 
 	// Locale switcher (try to keep equivalent post)
 	const availableLocales = computed(() =>
@@ -298,50 +248,11 @@
 						>
 					</div>
 
-					<section
-						class="mb-6 rounded-md border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
-						<h3 class="mb-3 text-sm font-semibold">{{
-							t("blog.categories")
-						}}</h3>
-						<div class="flex flex-wrap gap-2">
-							<button
-								class="rounded border px-2 py-1 text-xs transition hover:bg-gray-100 dark:hover:bg-gray-800"
-								:class="{ 'border-gray-900 dark:border-gray-100': !activeCat }"
-								@click="updateQuery({ cat: undefined })"
-								>{{ t("blog.allCategories") }}</button
-							>
-							<button
-								v-for="c in categories || []"
-								:key="c.slug || c.name"
-								class="rounded px-2 py-1 text-xs text-white"
-								:style="{ backgroundColor: c.color || '#6b7280' }"
-								@click="updateQuery({ cat: c.slug || c.name })"
-								>{{ c.name }}</button
-							>
-						</div>
-					</section>
-
-					<section
-						class="rounded-md border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
-						<h3 class="mb-3 text-sm font-semibold">{{ t("blog.tags") }}</h3>
-						<div class="flex flex-wrap gap-2">
-							<button
-								class="rounded border px-2 py-1 text-xs transition hover:bg-gray-100 dark:hover:bg-gray-800"
-								:class="{ 'border-gray-900 dark:border-gray-100': !activeTag }"
-								@click="updateQuery({ tag: undefined })"
-								>{{ t("blog.allTags") }}</button
-							>
-							<button
-								v-for="item in tagCloud || []"
-								:key="item.tag"
-								class="rounded px-2 py-1 text-xs text-white"
-								:style="{ backgroundColor: tagColor(item.tag) }"
-								@click="updateQuery({ tag: item.tag })"
-								:title="`${item.count} ${t('blog.occurrences')}`"
-								>#{{ item.tag }}</button
-							>
-						</div>
-					</section>
+					<BlogSideAuthors :limit="10" />
+					<BlogSideSeries :limit="10" />
+					<BlogSideCategories :limit="10" />
+					<BlogSideTags :limit="10" />
+					<BlogSidePosts :limit="10" />
 				</aside>
 			</div>
 		</main>
