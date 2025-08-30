@@ -8,7 +8,7 @@
 
 	// Flag para transições de rota/idioma a fim de evitar 404 durante trocas
 	const isNavigating = ref(false);
-	if (process.client) {
+	if (import.meta.client) {
 		// Marca início da troca de rota
 		onBeforeRouteUpdate(() => {
 			isNavigating.value = true;

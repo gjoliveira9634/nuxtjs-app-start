@@ -145,11 +145,11 @@
 				<div class="relative ml-auto w-full max-w-xl">
 					<input
 						:value="q"
-						@input="onSearchInput"
 						:placeholder="t('blog.searchPlaceholder')"
 						class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 pr-9 text-sm transition outline-none focus:border-gray-500 dark:border-gray-700 dark:bg-gray-900"
 						type="search"
-						aria-label="Search" />
+						aria-label="Search"
+						@input="onSearchInput" />
 					<span
 						class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-gray-400"
 						>Ctrl K</span

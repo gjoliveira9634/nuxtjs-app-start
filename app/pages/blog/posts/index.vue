@@ -1,8 +1,8 @@
 <script setup lang="ts">
+	import { usePagination } from "~/composables/usePagination";
 	definePageMeta({ layout: "blog" });
 	const { t, locale } = useI18n();
 	const localePath = useLocalePath();
-	import { usePagination } from "~/composables/usePagination";
 
 	const title = computed(() => `${t("site.blog")} — Posts`);
 	const description = computed(() => t("site.tagline"));
@@ -100,8 +100,8 @@
 	<div class="py-8">
 		<h1 class="mb-6 text-3xl font-semibold">{{ $t("site.blog") }}</h1>
 		<div
-			class="mb-3 flex flex-wrap items-center justify-between gap-3"
-			v-if="(pagedItems || []).length && totalPages > 1">
+			v-if="(pagedItems || []).length && totalPages > 1"
+			class="mb-3 flex flex-wrap items-center justify-between gap-3">
 			<div class="text-xs text-gray-600 dark:text-gray-400">
 				{{ showingFrom }}–{{ showingTo }} / {{ totalItems }}
 			</div>
@@ -119,8 +119,8 @@
 
 		<div
 			v-if="(pagedItems || []).length"
-			class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-			id="posts-list">
+			id="posts-list"
+			class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 			<BlogCardPost
 				v-for="post in pagedItems || []"
 				:key="post.path"
@@ -133,8 +133,8 @@
 			{{ $t("blog.noResults") }}
 		</div>
 		<div
-			class="mt-4 flex flex-wrap items-center justify-between gap-3"
-			v-if="(pagedItems || []).length && totalPages > 1">
+			v-if="(pagedItems || []).length && totalPages > 1"
+			class="mt-4 flex flex-wrap items-center justify-between gap-3">
 			<div class="text-xs text-gray-600 dark:text-gray-400">
 				{{ showingFrom }}–{{ showingTo }} / {{ totalItems }}
 			</div>

@@ -93,8 +93,8 @@
 	<div class="py-8">
 		<h1 class="mb-6 text-3xl font-semibold">{{ t("post.series") }}</h1>
 		<div
-			class="mb-3 flex flex-wrap items-center justify-between gap-3"
-			v-if="(pagedItems || []).length && totalPages > 1">
+			v-if="(pagedItems || []).length && totalPages > 1"
+			class="mb-3 flex flex-wrap items-center justify-between gap-3">
 			<div class="text-xs text-gray-600 dark:text-gray-400">
 				{{ showingFrom }}–{{ showingTo }} / {{ totalItems }}
 			</div>
@@ -112,8 +112,8 @@
 
 		<div
 			v-if="(pagedItems || []).length"
-			class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-			id="series-list">
+			id="series-list"
+			class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			<BlogCardSerie
 				v-for="s in pagedItems || []"
 				:key="s.title"
@@ -126,8 +126,8 @@
 			{{ t("blog.noResults") }}
 		</div>
 		<div
-			class="mt-4 flex flex-wrap items-center justify-between gap-3"
-			v-if="(pagedItems || []).length && totalPages > 1">
+			v-if="(pagedItems || []).length && totalPages > 1"
+			class="mt-4 flex flex-wrap items-center justify-between gap-3">
 			<div class="text-xs text-gray-600 dark:text-gray-400">
 				{{ showingFrom }}–{{ showingTo }} / {{ totalItems }}
 			</div>

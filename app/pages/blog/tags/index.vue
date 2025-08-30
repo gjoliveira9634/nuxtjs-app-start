@@ -1,4 +1,6 @@
 <script setup lang="ts">
+	import { usePagination } from "~/composables/usePagination";
+
 	definePageMeta({ layout: "blog" });
 	const { t, locale } = useI18n();
 	const localePath = useLocalePath();
@@ -54,8 +56,6 @@
 				|| (c.description || "").toLowerCase().includes(s),
 		);
 	});
-
-	import { usePagination } from "~/composables/usePagination";
 	const {
 		page,
 		perPage,
@@ -88,8 +88,8 @@
 	<div class="py-8">
 		<h1 class="mb-6 text-3xl font-semibold">{{ $t("blog.tags") }}</h1>
 		<div
-			class="mb-3 flex flex-wrap items-center justify-between gap-3"
-			v-if="(pagedItems || []).length && totalPages > 1">
+			v-if="(pagedItems || []).length && totalPages > 1"
+			class="mb-3 flex flex-wrap items-center justify-between gap-3">
 			<div class="text-xs text-gray-600 dark:text-gray-400"
 				>{{ showingFrom }}–{{ showingTo }} / {{ totalItems }}</div
 			>
@@ -104,8 +104,8 @@
 		</div>
 		<div
 			v-if="(pagedItems || []).length"
-			class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-			id="tags-list">
+			id="tags-list"
+			class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			<BlogCardTag
 				v-for="c in pagedItems || []"
 				:key="c.slug || c.name"
@@ -120,8 +120,8 @@
 			{{ $t("blog.noResults") }}
 		</div>
 		<div
-			class="mt-4 flex flex-wrap items-center justify-between gap-3"
-			v-if="(pagedItems || []).length && totalPages > 1">
+			v-if="(pagedItems || []).length && totalPages > 1"
+			class="mt-4 flex flex-wrap items-center justify-between gap-3">
 			<div class="text-xs text-gray-600 dark:text-gray-400"
 				>{{ showingFrom }}–{{ showingTo }} / {{ totalItems }}</div
 			>

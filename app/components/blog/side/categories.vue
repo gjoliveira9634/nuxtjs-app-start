@@ -54,7 +54,7 @@
 					class="flex items-center gap-2 rounded px-2 py-1 text-xs hover:bg-gray-100 dark:hover:bg-gray-800">
 					<span
 						class="inline-block h-2 w-2 rounded-full"
-						:style="{ backgroundColor: c.color || '#6b7280' }"></span>
+						:style="{ backgroundColor: c.color || '#6b7280' }" />
 					<span class="truncate">{{ c.name }}</span>
 				</NuxtLink>
 			</li>
