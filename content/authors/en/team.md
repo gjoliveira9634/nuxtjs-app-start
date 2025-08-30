@@ -9,6 +9,7 @@ social:
   website: https://example.com
 featured: true
 joinDate: 2024-01-10
+primaryLanguage: es
 ---
 
 We are the editorial team. This page can hold a longer biography in Markdown.

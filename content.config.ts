@@ -170,11 +170,9 @@ export default defineContentConfig({
 					.describe("Nível de dificuldade"),
 
 				language: type
-					.string()
-					.min(2)
-					.max(10)
+					.enum(["en", "pt", "es", "fr"])
 					.default("en")
-					.describe("Locale do post (ex.: en, pt)"),
+					.describe("Locale do post"),
 
 				// 🔧 Técnico e Funcionalidades
 				toc: type.boolean().default(true).describe("Exibir índice"),
@@ -259,6 +257,10 @@ export default defineContentConfig({
 					.optional(),
 				featured: type.boolean().default(false),
 				joinDate: type.coerce.date(),
+				primaryLanguage: type
+					.enum(["en", "pt", "es", "fr"])
+					.default("en")
+					.describe("Idioma principal do autor"),
 			}),
 		}),
 

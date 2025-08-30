@@ -31,6 +31,9 @@
 		return `/posts/${localeLower}/${slug}`;
 	});
 
+	// Define slug para uso global
+	const slug = computed(() => (route.params.slug as string[]).join("/"));
+
 	const {
 		data: doc,
 		pending,
@@ -96,8 +99,26 @@
 		// Aguarda a busca terminar antes de decidir 404
 		if (pending.value || isNavigating.value) return;
 		if (!doc.value) {
-			// Redireciona de forma suave para a listagem no mesmo locale se não encontrar
-			navigateTo(localePath("/blog"), { replace: true });
+			// Tenta encontrar o post em qualquer locale para obter o autor
+			const findAuthor = async () => {
+				const slug = (route.params.slug as string[]).join("/");
+				const posts = await queryCollection("posts").all();
+				const found = posts.find(
+					(p: any) =>
+						(p?.path as string)?.endsWith(`/${slug}`) || p?.seo?.slug === slug,
+				);
+				return found?.author?.name || null;
+			};
+
+			findAuthor().then((authorName) => {
+				// Redireciona para página de tradução faltante
+				navigateTo(
+					localePath(
+						`/missing-translation?slug=${encodeURIComponent(slug.value)}&locale=${locale.value}&author=${encodeURIComponent(authorName || "")}`,
+					),
+					{ replace: true },
+				);
+			});
 			return;
 		}
 

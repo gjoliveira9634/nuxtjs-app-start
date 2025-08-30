@@ -9,6 +9,7 @@ social:
   website: https://example.com/test
 featured: false
 joinDate: 2024-01-10
+primaryLanguage: en
 ---
 
 Bio in Markdown for Test Author.

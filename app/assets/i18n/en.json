@@ -19,6 +19,15 @@
 		"goHome": "Go back home",
 		"error": "Error"
 	},
+	"missingTranslation": {
+		"title": "Oops! Translation not available",
+		"message": "The author hasn't published this article in {locale} yet.",
+		"goHome": "Back to blog",
+		"contactAuthor": "Contact the author",
+		"contactFallback": "Contact feature not available",
+		"authorSince": "Author since",
+		"viewAuthorPosts": "View author's posts"
+	},
 	"post": {
 		"categories": "Categories",
 		"series": "Series",

@@ -19,6 +19,15 @@
 		"goHome": "Retour à l'accueil",
 		"error": "Erreur"
 	},
+	"missingTranslation": {
+		"title": "Oups ! Traduction non disponible",
+		"message": "L'auteur n'a pas encore publié cet article en {locale}.",
+		"goHome": "Retour au blog",
+		"contactAuthor": "Contacter l'auteur",
+		"contactFallback": "Fonction de contact non disponible",
+		"authorSince": "Auteur depuis",
+		"viewAuthorPosts": "Voir les articles de l'auteur"
+	},
 	"post": {
 		"categories": "Catégories",
 		"series": "Série",
