@@ -114,7 +114,7 @@
 				// Redireciona para página de tradução faltante
 				navigateTo(
 					localePath(
-						`/missing-translation?slug=${encodeURIComponent(slug.value)}&locale=${locale.value}&author=${encodeURIComponent(authorName || "")}`,
+						`/blog/missing-translation?slug=${encodeURIComponent(slug.value)}&locale=${locale.value}&author=${encodeURIComponent(authorName || "")}`,
 					),
 					{ replace: true },
 				);
